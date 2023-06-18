@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>BetterNaifuYTG Options</title>
+    <link rel="stylesheet" href="chrome://browser/content/extension.css">
+  </head>
+  <body>
+
+		<div class="section">
+      <h3 class="options-heading">Chat Options</h3>
+      <div class="options-description">Changes apply to new messages (refresh chat to apply to all)</div>
+      <div class="options-description" id="chat-options">[click to collapse section]</div>
+
+      <div class="options-table" id="chat-options">
+        <div class="option-row">
+          <div class="option-cell"><label for="enableChatColors">Enable chat username colors</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="enableChatColors" class="option-input"></div>
+        </div>
+
+				<div class="option-row">
+					<div class="option-cell"><label for="disableAvatars">Hide profile pictures in chat (<em>click to toggle</em>)</label></div>
+					<div class="option-cell"><input disabled type="checkbox"
+					id="disableAvatars" class="option-input"></div>
+				</div>
+
+				<div class="option-row">
+          <div class="option-cell"><label for="moveBadges">Move user badges in front of username</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="moveBadges" class="option-input"></div>
+        </div>
+
+				<div class="option-row">
+          <div class="option-cell"><label for="liveChatByDefault">Switch to live chat by default (<em>on page load/chat reopen</em>)</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="liveChatByDefault" class="option-input"></div>
+        </div>
+
+				<div class="option-row">
+          <div class="option-cell"><label for="replaceTooltips">Hover over default/member emotes to see their names</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="replaceTooltips" class="option-input"></div>
+        </div>
+
+        <div class="option-row">
+					<div class="option-cell"><label for="hideMessages">Hide non-member messages (<em>click to toggle</em>)</label></div>
+					<div class="option-cell"><input disabled type="checkbox"
+					id="hideMessages" class="option-input"></div>
+				</div>
+
+        <div class="option-row">
+          <div class="option-cell"><label for="hideReactions">Hide emoji reactions panel (<em>click to toggle</em>)</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="hideReactions" class="option-input"></div>
+        </div>
+
+				<div class="option-row">
+          <div class="option-cell"><label for="hideMessageKeywords">Hide messages/usernames containing keywords</label></div>
+        </div>
+				<div class="option-row" style="justify-content: end;">
+          <div class="option-cell"><label for="caseInsensitiveHMK" style="white-space: nowrap;">Case-insensitive matching</label></div>
+					<div class="option-cell"><input disabled type="checkbox" id="caseInsensitiveHMK" class="option-input"></div>
+					<div class="option-cell fill-width"></div>
+					<div class="option-cell"><label for="hideUsernames" style="white-space: nowrap;">Hide based on usernames</label></div>
+					<div class="option-cell"><input disabled type="checkbox" id="hideUsernames" class="option-input"></div></div>
+				<div class="option-row">
+          <div class="option-cell fill-width"><label for="hideMessageKeywords" class="flex-container fill-width">
+						<input disabled type="text" placeholder="Type regex* here (e.g. &quot;dog|cat&quot; matches &quot;dog&quot; or &quot;cat&quot;)" id="hideMessageKeywords" class="option-input fill-width">
+					</label></div>
+        </div>
+
+				<!-- highlight keywords -->
+				<div class="option-row">
+          <div class="option-cell"><label for="highlightKeywords">Highlight messages/usernames containing keywords</label></div>
+        </div>
+				<div class="option-row flex-container" style="justify-content: end;">
+          <div class="option-cell fill-width" style="white-space: nowrap"><label for="caseInsensitive">Case-insensitive matching</label></div>
+					<div class="option-cell fill-width"><input disabled type="checkbox" id="caseInsensitive" class="option-input" style="margin-bottom: 3px;"></div>
+					<div class="option-cell fill-width"></div>
+					<div class="option-cell fill-width" style="white-space: nowrap"><label for="highlightColor" id="colorText">Highlight color*:</label></div>
+					<div class="option-cell fill-width">
+						<input disabled type="text" id="highlightColor" class="option-input fill-width" style="width: 4.9em;margin-top: 0px;margin-bottom: 2px;" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" placeholder="Hex code">
+					</div>
+				</div>
+				<div class="option-row">
+          <div class="option-cell fill-width"><label for="highlightKeywords" class="flex-container fill-width">
+						<input disabled type="text" placeholder="Type regex† here (e.g. &quot;hi|bye&quot; matches &quot;hi&quot; or &quot;bye&quot;)" id="highlightKeywords" class="option-input fill-width">
+					</label></div>
+        </div>
+
+				<div class="option-row" style="margin-bottom: 2px; font-size: 11px;">
+          <div class="option-cell"><label for="highlightKeywords" style="text-align: right;">†<em><a href="https://regex101.com/" target="_blank">JavaScript regex</a>, works with emote names</em></label></div>
+					<div class="option-cell"><label for="highlightColor" style="text-align: right;">*<em><a href="https://htmlcolorcodes.com/" target="_blank">Hex codes</a></em></label></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="section">
+      <h3 class="options-heading">Emote Options</h3>
+      <div class="options-description">Refresh chat to apply changes</div>
+      <div class="options-description" id="emote-options">[click to expand section]</div>
+
+      <div class="options-table" id="emote-options" style="display: none;">
+				<div class="option-row">
+          <div class="option-cell"><label for="enableBetterYTGEmotes">Enable BetterNaifuYTG custom emotes</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="enableBetterYTGEmotes" class="option-input"></div>
+        </div>
+
+        <div class="option-row">
+          <div class="option-cell"><label for="enableTwitchEmotes">Enable Twitch global emotes</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="enableTwitchEmotes" class="option-input"></div>
+        </div>
+
+				<div class="option-row">
+          <div class="option-cell"><label for="enableBTTVEmotes">Enable BTTV global emotes</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="enableBTTVEmotes" class="option-input"></div>
+        </div>
+
+				<div class="option-row">
+          <div class="option-cell"><label for="enableFFZEmotes">Enable FFZ global emotes</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="enableFFZEmotes" class="option-input"></div>
+        </div>
+
+        <div class="option-row">
+          <div class="option-cell"><label for="tabComplete">Tab complete extension emotes when typing</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="tabComplete" class="option-input"></div>
+        </div>
+
+        <div class="option-row">
+          <div class="option-cell">
+            <label for="disableAutoEmoji">
+              Disable YT emoji autocomplete (e.g. ":)"&thinsp;→&thinsp;<img src="https://www.youtube.com/s/gaming/emoji/0f0cae22/emoji_u1f642.svg" style="display:inline;height:1em;vertical-align:middle;">&thinsp;,&thinsp;"Kappa"&thinsp;→&thinsp;<img src="https://www.youtube.com/s/gaming/emoji/0f0cae22/emoji_u1f31d.svg" style="display:inline;height:1em;vertical-align:middle;">&thinsp;)
+            </label>
+          </div>
+          <div class="option-cell"><input disabled type="checkbox" id="disableAutoEmoji" class="option-input"></div>
+        </div>
+
+				<div class="option-row">
+          <div class="option-cell"><label for="emoteBlacklist">Blacklist emotes (also works for default/member emotes)</label></div>
+        </div>
+				<div class="option-row">
+          <div class="option-cell fill-width"><label for="emoteBlacklist" class="flex-container fill-width">
+						<input disabled type="text" placeholder="Type emote names here separated by spaces" id="emoteBlacklist" class="option-input fill-width" style="margin-top: 2px; margin-bottom: 4px;">
+					</label></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="section">
+      <h3 class="options-heading">Site Options</h3>
+      <div class="options-description">Hide/reopen chat or refresh page to apply changes</div>
+      <div class="options-description" id="site-options">[click to expand section]</div>
+
+      <div class="options-table" id="site-options" style="display: none;">
+        <div class="option-row" style="display: none">
+          <div class="option-cell"><label for="enableYoutubeGaming">Enable BetterNaifuYTG on Youtube Gaming</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="enableYoutubeGaming" class="option-input"></div>
+        </div>
+
+        <div class="option-row">
+          <div class="option-cell"><label for="enableYoutubeVanilla">Enable extension on Youtube (youtube.com)</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="enableYoutubeVanilla" class="option-input"></div>
+        </div>
+
+        <div class="option-row">
+          <div class="option-cell"><label for="enableYoutubeEmbed">Enable extension in Youtube chat embeds</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="enableYoutubeEmbed" class="option-input"></div>
+        </div>
+
+				<div class="option-row">
+          <div class="option-cell"><label for="enableChatPopout">Enable extension in Youtube chat popouts</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="enableChatPopout" class="option-input"></div>
+        </div>
+      </div>
+    </div>
+
+		<div class="hr"></div>
+
+		<div class="section">
+			<h3 class="options-heading">Emote Dictionary</h3>
+				<div class="options-description"></div>
+				<div class="options-table">
+					<div class="option-row">
+						<div class="options-cell">See a list of the emotes included in the extension <a href="https://betternaifu.github.io/betternaifuytg" target="_blank">here</a>.</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="section" style="display: none;">
+			<h3 class="options-heading"></h3>
+			<div class="options-table">
+				<div class="option-row">
+					<div class="option-cell"><label for="ClickThis">:)</label></div>
+					<div class="option-cell"><input disabled type="checkbox" id="ClickThis" class="option-input"></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="bottom-hr"></div>
+    <div id="save-status">&nbsp;</div>
+
+    <script src="../options.js"></script>
+  </body>
+</html>

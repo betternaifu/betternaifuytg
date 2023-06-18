@@ -1,0 +1,123 @@
+colors = {
+  'A': #f44336,
+  'B': #e91e63,
+  'C': #9c27b0,
+  'D': #673ab7,
+  'E': #536dfe,
+  'F': #2196f3,
+  'G': #03a9f4,
+  'H': #00bcd4,
+  'I': #009688,
+  'J': #4caf50,
+  'K': #8bc34a,
+  'L': #cddc39,
+  'M': #ffeb3b,
+  'N': #ffc107,
+  'O': #ff9800,
+  'P': #ff5722,
+  'Q': #f44336,
+  'R': #e91e63,
+  'S': #9c27b0,
+  'T': #673ab7,
+  'U': #536dfe,
+  'V': #2196f3,
+  'W': #03a9f4,
+  'X': #00bcd4,
+  'Y': #009688,
+  'Z': #4caf50,
+
+  'a': #8bc34a,
+  'b': #cddc39,
+  'c': #ffeb3b,
+  'd': #ffc107,
+  'e': #ff9800,
+  'f': #ff5722,
+  'g': #f44336,
+  'h': #e91e63,
+  'i': #9c27b0,
+  'j': #673ab7,
+  'k': #536dfe,
+  'l': #2196f3,
+  'm': #03a9f4,
+  'n': #00bcd4,
+  'o': #009688,
+  'p': #4caf50,
+  'q': #8bc34a,
+  'r': #cddc39,
+  's': #ffeb3b,
+  't': #ffc107,
+  'u': #ff9800,
+  'v': #ff5722,
+  'w': #f44336,
+  'x': #e91e63,
+  'y': #9c27b0,
+  'z': #673ab7,
+
+  '0': #536dfe,
+  '1': #2196f3,
+  '2': #03a9f4,
+  '3': #00bcd4,
+  '4': #009688,
+  '5': #4caf50,
+  '6': #8bc34a,
+  '7': #cddc39,
+  '8': #ffeb3b,
+  '9': #ffc107,
+  '-': #ff9800,
+  '_': #ff5722
+}
+
+for id, col in colors
+  .BYTG-chat-color-{id}
+    #content, #container // #container is for participant list
+      #author-name
+        color: col !important
+
+// Adjust yellow in light mode
+for id in M c s 8
+  html:not([dark]) .BYTG-chat-color-{id}
+    #content, #container
+      yt-live-chat-author-chip:not([is-highlighted]) #author-name
+        color: #f7db02 !important
+
+// Adjusting highlighted lime in light mode
+for id in L b r 7
+  html:not([dark]) .BYTG-chat-color-{id}
+    #content, #container
+      yt-live-chat-author-chip[is-highlighted] #author-name
+        color: #e1fa4b !important
+
+// Adjusting highlighted yellow-orange in light mode
+for id in N d t 9
+  html:not([dark]) .BYTG-chat-color-{id}
+    #content, #container
+     yt-live-chat-author-chip[is-highlighted] #author-name
+        color: #ffc905 !important
+
+// Adjusting highlighted purple in dark mode
+for id in C S i y
+  html[dark] .BYTG-chat-color-{id}
+    #content, #container
+      yt-live-chat-author-chip[is-highlighted] #author-name
+        color: #5c0066 !important
+
+// Adjusting highlighted dark purple in dark mode
+for id in D T j z
+  html[dark] .BYTG-chat-color-{id}
+    #content, #container
+      yt-live-chat-author-chip[is-highlighted] #author-name
+        color: #401782 !important
+
+// Adjusting dark purple in dark mode
+for id in D T j z
+  html[dark] .BYTG-chat-color-{id}
+    #content, #container
+      yt-live-chat-author-chip:not([is-highlighted]) #author-name
+        color: #7445c4 !important
+
+// Adjusting highlighted blue in dark mode
+for id in E U k 0
+  html[dark] .BYTG-chat-color-{id}
+    #content, #container
+      yt-live-chat-author-chip[is-highlighted] #author-name
+        color: #5078ff !important
