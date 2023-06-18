@@ -1,0 +1,102 @@
+.section
+  &:nth-child(1)
+    .options-heading
+        margin: 0
+
+.options-heading
+	font-weight: bold
+	font-size: 12px
+	margin: 0 0 0 0
+
+.options-description
+	margin: 0 0 2px 0
+	opacity: 0.8
+	font-size: 11px
+
+.options-description[id]:hover
+	cursor:pointer
+
+table
+  border: none
+  border-spacing: 0
+  width: 100%
+  tr td
+    padding: 0
+    &:nth-child(1)
+      width: 80%
+    &:nth-child(2)
+      width: 20%
+      text-align: right
+
+hr-margin = 3px
+
+.hr
+  height: 1px
+  background: #bbb
+  margin: hr-margin 0 hr-margin 0
+
+.sep
+	height: 0px
+	background: #bbb
+	opacity: 0
+	margin: 3px 0 1px 0
+
+#save-status
+	text-align: center
+	opacity: 0
+	transition: all 1s linear
+	&.show
+		opacity: 1
+		transition: none
+
+.options-table
+	.option-row
+		display: flex
+		flex-direction: row
+		align-items: space-between
+		justify-content: space-between
+	.option-cell
+		padding-right: 5px
+		&:last-child
+      padding-right: 0px
+
+.light-text
+  color: rgba(#000, 0.6)
+
+body-margin = 6px
+
+.bottom-hr
+	height: 1px
+	background: #bbb
+	margin: hr-margin 0 4px 0
+
+body
+	min-width: 348px
+	max-width: 382px
+	margin: 4px body-margin 4px body-margin
+	background-color: white
+
+//@media (prefers-color-scheme: light) {body {background-color: white;}}
+
+label
+	vertical-align: middle
+
+.fill-width
+	flex: 1
+
+.flex-container
+	display: flex
+
+input[type="text"]
+	margin-top: 2px
+	display: inline
+	//width: 328px //291px
+	max-height: 10px
+	resize: none
+	overflow: hidden
+	white-space: nowrap
+	padding: 4px
+	font-size: 12px
+
+input[type="checkbox"]
+  margin-bottom: 2px

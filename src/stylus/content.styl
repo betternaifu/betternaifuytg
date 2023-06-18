@@ -1,0 +1,288 @@
+@import '_chatColors.styl'
+@import url("https://fonts.googleapis.com/css?family=Material+Icons")
+
+
+#items
+  .yt-live-chat-item-list-renderer[author-type="owner"] // Owner chat messages
+    background: rgba(#fff, 0.1);
+    #content #author-name
+      text-shadow: #ffd600 0px 0px 10px
+
+  #menu #menu-button.yt-live-chat-text-message-renderer // Chat user menu button (3 dot menu)
+    padding: 5px !important
+    width: 28px !important
+    height: 28px !important
+
+  #content
+    #author-name.yt-live-chat-text-message-renderer // Chat user name
+      &:after
+        content: ' :'
+        color: #fff
+
+		#message
+			tp-yt-paper-tooltip
+				display: none
+
+left-shift = -8px
+opaqueness = 90%
+
+.BYTG-Emote
+	position: relative
+	display: inline-block
+
+	img.bytg-img
+		max-height: 28px
+		display: inline !important
+		height: 100%
+		vertical-align: middle
+
+	img.yt-img
+		width: var(--yt-live-chat-emoji-size)
+		height: var(--yt-live-chat-emoji-size)
+		margin: -1px 2px 1px
+		vertical-align: middle
+
+	&:before
+		content: attr(custom-tooltip-text)
+		position: absolute !important
+		top: 50%
+		transform: translateY(-50%) translateX(left-shift)
+		left: 100%
+		margin-left: 10px
+		min-width: max-content
+		padding: 5px
+		border-radius: 5px
+		background: #000
+		color: #fff
+		opacity: opaqueness
+		text-align: center
+		display: none
+
+	&:after
+		content: ""
+		position: absolute !important
+		left: 100%
+		margin-left: 0px
+		top: 50%
+		transform: translateY(-50%) translateX(left-shift)
+		border: 5px solid #000
+		border-color: transparent black transparent transparent
+		opacity: opaqueness
+		display: none
+
+	&:hover
+		&:before, &:after
+			display:block
+			z-index: 1
+
+// Tooltip setup from https://codepen.io/cbracco/pen/nufHz with some adjustments
+[data-tooltip], .tooltip {
+  position: relative;
+  cursor: pointer;
+	opacity: 0.5;
+}
+
+// adjust opacity to match the overflow icon
+[data-tooltip], .tooltip
+	&:hover, &:focus
+		opacity: 1
+
+// Base styles for the entire tooltip
+[data-tooltip]:before, [data-tooltip]:after, .tooltip:before, .tooltip:after {
+	position: absolute;
+	visibility: hidden;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+	filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  opacity: 0;
+	-webkit-transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out, -webkit-transform 0.2s cubic-bezier(0.71, 1.7, 0.77, 1.24);
+	-moz-transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out, -moz-transform 0.2s cubic-bezier(0.71, 1.7, 0.77, 1.24);
+	transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out,  transform 0.2s cubic-bezier(0.71, 1.7, 0.77, 1.24);
+	-webkit-transform: translate3d(0, 0, 0);
+	-moz-transform: translate3d(0, 0, 0);
+	transform: translate3d(0, 0, 0);
+	pointer-events: none;
+}
+
+// Show the entire tooltip on hover and focus
+[data-tooltip]:hover:before, [data-tooltip]:hover:after, [data-tooltip]:focus:before, [data-tooltip]:focus:after, .tooltip:hover:before, .tooltip:hover:after, .tooltip:focus:before, .tooltip:focus:after {
+  visibility: visible;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+	filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+	opacity: 1;
+}
+
+// Base styles for the tooltip's directional arrow
+.tooltip:before, [data-tooltip]:before {
+  z-index: 1001;
+  border: 6px solid transparent;
+  background: transparent;
+  content: "";
+}
+
+// Base styles for the tooltip's content area
+.tooltip:after, [data-tooltip]:after {
+  z-index: 1000;
+  padding: 8px;
+  width: max-content;
+  background-color: #000;
+  background-color: hsla(0, 0%, 20%, 0.9);
+  color: #fff;
+  content: attr(data-tooltip);
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+// Directions
+
+// Top (default)
+[data-tooltip]:before, [data-tooltip]:after, .tooltip:before, .tooltip:after, .tooltip-top:before, .tooltip-top:after {
+  bottom: 100%;
+  left: 50%;
+}
+
+[data-tooltip]:before,
+.tooltip:before, .tooltip-top:before {
+  margin-left: -6px;
+  margin-bottom: -12px;
+  border-top-color: #000;
+  border-top-color: hsla(0, 0%, 20%, 0.9);
+}
+
+// Horizontally align top/bottom tooltips
+[data-tooltip]:after, .tooltip:after, .tooltip-top:after {
+  margin-left: -80px;
+}
+
+[data-tooltip]:hover:before, [data-tooltip]:hover:after, [data-tooltip]:focus:before, [data-tooltip]:focus:after, .tooltip:hover:before, .tooltip:hover:after, .tooltip:focus:before, .tooltip:focus:after, .tooltip-top:hover:before, .tooltip-top:hover:after, .tooltip-top:focus:before, .tooltip-top:focus:after {
+  -webkit-transform: translateY(-12px);
+  -moz-transform: translateY(-12px);
+  transform: translateY(-12px);
+}
+
+// Left
+.tooltip-left:before, .tooltip-left:after {
+  right: 100%;
+  bottom: 50%;
+  left: auto;
+}
+
+.tooltip-left:before {
+  margin-left: 0;
+  margin-right: -12px;
+  margin-bottom: 0;
+  border-top-color: transparent;
+  border-left-color: #000;
+  border-left-color: hsla(0, 0%, 20%, 0.9);
+  z-index: 0;
+}
+
+.tooltip-left:hover:before, .tooltip-left:hover:after, .tooltip-left:focus:before, .tooltip-left:focus:after {
+  -webkit-transform: translateX(-12px);
+  -moz-transform: translateX(-12px);
+  transform: translateX(-12px);
+}
+
+// Bottom
+.tooltip-bottom:before, .tooltip-bottom:after {
+  top: 100%;
+  bottom: auto;
+  left: 50%;
+}
+
+.tooltip-bottom:before {
+  margin-top: -12px;
+  margin-bottom: 0;
+  border-top-color: transparent;
+  border-bottom-color: #000;
+  border-bottom-color: hsla(0, 0%, 20%, 0.9);
+}
+
+.tooltip-bottom:hover:before, .tooltip-bottom:hover:after, .tooltip-bottom:focus:before, .tooltip-bottom:focus:after {
+  -webkit-transform: translateY(12px);
+  -moz-transform: translateY(12px);
+  transform: translateY(12px);
+}
+
+// Right
+.tooltip-right:before, .tooltip-right:after {
+  bottom: 50%;
+  left: 100%;
+}
+
+.tooltip-right:before {
+  margin-bottom: 0;
+  margin-left: -12px;
+  border-top-color: transparent;
+  border-right-color: #000;
+  border-right-color: hsla(0, 0%, 20%, 0.9);
+}
+
+.tooltip-right:hover:before, .tooltip-right:hover:after, .tooltip-right:focus:before, .tooltip-right:focus:after {
+  -webkit-transform: translateX(12px);
+  -moz-transform: translateX(12px);
+  transform: translateX(12px);
+}
+
+// Move directional arrows down a bit for left/right tooltips
+.tooltip-left:before, .tooltip-right:before {
+  top: 25%; //5 or 6px
+}
+
+// Vertically center tooltip content for left/right tooltips
+.tooltip-left:after, .tooltip-right:after {
+  margin-left: 0;
+  margin-bottom: -16px;
+}
+
+// Tooltip for TabCompleter
+#tabcomplete-tooltip-container
+  position: absolute
+  top: 0px
+  left: 0px
+  height: 28px
+  border-radius: 4px
+  padding: 3px
+  border: 1px solid var(--yt-live-chat-primary-text-color)
+  background: var(--yt-live-chat-background-color)
+  transform: translateX(-50%)
+
+.hiding
+  display: none
+
+.tabcomplete-image-container
+  height: 28px
+  display: flex
+  justify-content: center
+  align-items: center
+
+.tabcomplete-image
+  max-height: 28px
+
+// Just some margin adjustments for my preference :)
+#author-photo.yt-live-chat-text-message-renderer
+  margin-right: 6px !important
+
+#author-photo.ytd-sponsorships-live-chat-gift-redemption-announcement-renderer
+  margin-right: 6px !important
+
+#timestamp.yt-live-chat-text-message-renderer
+  margin-right: 2px !important
+
+#timestamp.ytd-sponsorships-live-chat-gift-redemption-announcement-renderer
+  margin-right: 2px !important
+
+yt-live-chat-author-chip.yt-live-chat-text-message-renderer
+  margin-right: 6px !important
+
+yt-live-chat-author-chip.ytd-sponsorships-live-chat-gift-redemption-announcement-renderer
+  margin-right: 6px !important
+
+//yt-live-chat-author-chip.style-scope.ytd-sponsorships-live-chat-gift-redemption-announcement-renderer
+//  #author-name
+//    margin-left: -2px !important
+
+#content.style-scope.ytd-sponsorships-live-chat-gift-redemption-announcement-renderer
+  yt-formatted-string#message
+    margin-left: -6px !important
+  yt-icon#gift-icon
+    margin-left: -2px !important
