@@ -1,0 +1,20 @@
+{
+    "name": "index-generator",
+    "version": "0.0.1",
+    "description": "Updates index.html and dims.json",
+    "type": "module",
+    "scripts": {
+        "test": "echo test",
+        "start": "npm ci",
+        "emotes": "node indexGenerator.js"
+    },
+    "dependencies": {
+        "image-size": "^1.0.2"
+    },
+    "author": "betternaifu",
+    "license": "GPL 3.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/betternaifu/betternaifuytg"
+    }
+}

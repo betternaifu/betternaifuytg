@@ -1,11 +1,17 @@
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
 const fs = require('fs')
 
-const dictionary = require('json/dictionary.json')
-const bttv = require('json/bttv.json')
-const ffz = require('json/ffz.json')
-const twitch = require('json/twitch.json')
+const { promisify } = require('util')
+const sizeOf = promisify(require('image-size'))
 
-const newEmotes = require('json/newEmotes.json')
+const dictionary = require('./json/dictionary.json')
+const bttv = require('./json/bttv.json')
+const ffz = require('./json/ffz.json')
+const twitch = require('./json/twitch.json')
+
+const newEmotes = require('./json/newEmotes.json')
 
 const emoteDictionary = new Map()
 
@@ -105,7 +111,7 @@ let htmlstring = `<html class="theme-dark">
 <p><em>Note: Some emote names might conflict with Youtube's default emotes if the "Disable Youtube emoji autocomplete" option isn't enabled.</em></p>
 `
 
-htmlstring += specialTemplate('New/Updated Emotes', newUpdatedEmotes)
+htmlstring += specialTemplate('New/Updated Custom Emotes', newUpdatedEmotes)
 
 sorted.forEach((emotes, title) => {
   htmlstring += tableTemplate(title, emotes)
@@ -118,11 +124,51 @@ htmlstring += `
 </html>`
 
 // Write out
-const filePath = process.cwd() + 'index.html'
+const filePath = process.cwd() + '/index.html'
 fs.writeFile(filePath, htmlstring, /* { flag: "wx" }, */ function (err) {
   if (err) {
     console.log("File '" + filePath + "' couldn't be overwritten (or some other error occurred). Aborted!")
   } else {
     console.log('Done, saved to ' + filePath)
+  }
+})
+
+// Update dims.json
+const total = Object.keys(dictionary).length
+sizeOf.setConcurrency(Math.ceil(total / 1000) * 1000)
+let dims = ''
+for (let i = 0; i < emoteKeys.length; i++) {
+  const code = emoteKeys[i]
+  const emote = emoteDictionary.get(code)
+  const path = emote.file
+  if (emote.source === 'Custom') {
+    sizeOf(`${path}`).then(dimensions => { dims += `\t"${code.replace('\\', '\\\\')}":{"height":${dimensions.height},"width":${dimensions.width}},\n` }).catch(err => console.log(err))
+  }
+}
+let attempts = 0
+const checkForDims = (res, rej) => { if (dims.split('\n').length - 1 >= total) { res(0) } else { if (attempts < 10) { console.log(`Missing ${total - dims.split('\n').length + 1} image size(s)`); attempts += 1; setTimeout(checkForDims.bind(this, res, rej), 100) } else { rej(total - dims.split('\n').length + 1) } } }
+const waitForDims = new Promise(checkForDims)
+waitForDims.then(() => {
+  const dimFile = process.cwd() + '/json/dims.json'
+  fs.writeFile(dimFile, `{\n${dims.substring(0, dims.length - 2)}\n}`, 'utf8', function (err) {
+    if (err) {
+      console.log("File '" + dimFile + "' couldn't be overwritten (or some other error occurred). Aborted!")
+    } else {
+      console.log('Done, saved to ' + dimFile)
+    }
+  })
+}).catch((val) => {
+  const dimFile = process.cwd() + '/json/dims.json'
+  fs.writeFile(dimFile, `{\n${dims.substring(0, dims.length - 2)}\n}`, 'utf8', function (err) {
+    if (err) {
+      console.log("File '" + dimFile + "' couldn't be overwritten (or some other error occurred). Aborted!")
+    } else {
+      console.log('Done, saved to ' + dimFile)
+    }
+  })
+  if (val > 0) {
+    console.log(`Missing ${val} image size(s).`)
+    const missing = Object.keys(dictionary).filter(x => !dims.split('\n').filter(x => x.length > 0).map(x => x.split('\t')[1].split('":"')[0].split('"')[1].replace('\\\\', '\\')).includes(x))
+    console.log(missing.map(x => [x, emoteDictionary.get(x).file]))
   }
 })
