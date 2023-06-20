@@ -1,4 +1,3 @@
-
 {
 	":tf:":{"url":"https://cdn.betterttv.net/emote/54fa8f1401e468494b85b537/1x.webp","height":28,"width":28},
 	"CiGrip":{"url":"https://cdn.betterttv.net/emote/54fa8fce01e468494b85b53c/1x.webp","height":28,"width":28},
@@ -57,9 +56,9 @@
 	"cvHazmat":{"url":"https://cdn.betterttv.net/emote/5e76d338d6581c3724c0f0b2/1x.webp","height":28,"width":28},
 	"cvMask":{"url":"https://cdn.betterttv.net/emote/5e76d399d6581c3724c0f0b8/1x.webp","height":28,"width":28},
 	"DogChamp":{"url":"https://cdn.betterttv.net/emote/5ffdf28dc96152314ad63960/1x.webp","height":28,"width":28},
-  "FeelsPumpkingMan":{"url":"https://cdn.betterttv.net/emote/580e438942170bfd57189866/1x.webp","height":28,"width":28},
-  "SantaHat":{"url":"https://cdn.betterttv.net/emote/58487cc6f52be01a7ee5f205/1x.webp","height":38,"width":31},
-  "TopHat":{"url":"https://cdn.betterttv.net/emote/5849c9c8f52be01a7ee5f79e/1x.webp","height":38,"width":30},
-  "CandyCane":{"url":"https://cdn.betterttv.net/emote/567b5c080e984428652809ba/1x.webp","height":38,"width":30},
-  "ReinDeer":{"url":"https://cdn.betterttv.net/emote/567b5dc00e984428652809bd/1x.webp","height":38,"width":30}
+	"FeelsPumpkingMan":{"url":"https://cdn.betterttv.net/emote/580e438942170bfd57189866/1x.webp","height":28,"width":28},
+	"SantaHat":{"url":"https://cdn.betterttv.net/emote/58487cc6f52be01a7ee5f205/1x.webp","height":38,"width":31},
+	"TopHat":{"url":"https://cdn.betterttv.net/emote/5849c9c8f52be01a7ee5f79e/1x.webp","height":38,"width":30},
+	"CandyCane":{"url":"https://cdn.betterttv.net/emote/567b5c080e984428652809ba/1x.webp","height":38,"width":30},
+	"ReinDeer":{"url":"https://cdn.betterttv.net/emote/567b5dc00e984428652809bd/1x.webp","height":38,"width":30}
 }
