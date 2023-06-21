@@ -3,7 +3,7 @@
 
   "name": "Better Naifu YouTube Gaming",
   "short_name": "BetterNaifuYTG",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "BetterNaifuYTG enhances YouTube Live Chat with more emotes (Twitch, BTTV, FFZ Emotes), new features, and more.",
   "icons": {
     "16": "assets/icons/BetterYTG_red_16.png",
@@ -22,7 +22,7 @@
     "tabs",
     "*://*.youtube.com/*",
     "*://*.gaming.youtube.com/*",
-    "*://cdn.jsdelivr.net/gh/betternaifu/betternaifuytg/*"
+    "*://cdn.jsdelivr.net/gh/betternaifu/betternaifuytg*"
   ],
 
   "options_ui": {
