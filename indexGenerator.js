@@ -111,7 +111,7 @@ let htmlstring = `<html class="theme-dark">
 <p><em>Note: Some emote names might conflict with Youtube's default emotes if the "Disable Youtube emoji autocomplete" option isn't enabled.</em></p>
 `
 
-htmlstring += specialTemplate('New/Updated Custom Emotes', newUpdatedEmotes)
+htmlstring += specialTemplate('New/Updated Emotes', newUpdatedEmotes)
 
 sorted.forEach((emotes, title) => {
   htmlstring += tableTemplate(title, emotes)
