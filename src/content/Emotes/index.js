@@ -4,7 +4,7 @@ import Emote from './Emote'
 
 const REMOTE_OWNER = 'betternaifu'
 const REMOTE_REPO = 'betternaifuytg'
-const REMOTE_URL = `https://cdn.jsdelivr.net/gh/${REMOTE_OWNER}/${REMOTE_REPO}`
+const REMOTE_URL = `https://cdn.jsdelivr.net/gh/${REMOTE_OWNER}/${REMOTE_REPO}@latest`
 // const DEFAULT_BRANCH = 'main'
 // const FALLBACK_URL = `https://raw.githubusercontent.com/${REMOTE_OWNER}/${REMOTE_REPO}/${DEFAULT_BRANCH}`
 
