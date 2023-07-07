@@ -44,11 +44,11 @@ class Main {
     const makeOptionsPopup = () => {
       chrome.windows.getCurrent((window) => {
         const leftVal = Math.round((window.width - 394) * 0.99 + window.left)
-        const topVal = Math.round((window.height - 533) * 0.2 + window.top)
+        const topVal = Math.round((window.height - 550) * 0.2 + window.top)
         chrome.windows.create({
           url: 'html/options.html',
           type: 'popup',
-          height: 533,
+          height: 550,
           width: 394,
           left: leftVal,
           top: topVal

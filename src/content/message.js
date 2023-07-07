@@ -482,7 +482,7 @@ class Message {
 
   setHtml () {
     this.textNode.node.innerHTML = this.parsedText
-    if (true || this.node.querySelector('#img').src === this.authorAvatar) { // workaround for reset html for own sent messages
+    if (this.node.querySelector('#img').src === this.authorAvatar) { // workaround for reset html for own sent messages
       this.watch(2)
     }
   }
