@@ -10,7 +10,7 @@ const REMOTE_URL = `https://cdn.jsdelivr.net/gh/${REMOTE_OWNER}/${REMOTE_REPO}@l
 
 const fetchJSON = (url) => {
   return new Promise((res, rej) => {
-    fetch(url).then(response => response.status === 200 ? response.json() : response.status).then(res).catch(caught => { console.log(caught); rej(caught) })
+    fetch(url, { cache: 'no-cache' }).then(response => response.status === 200 ? response.json() : response.status).then(res).catch(caught => { console.log(caught); rej(caught) })
   })
 }
 
