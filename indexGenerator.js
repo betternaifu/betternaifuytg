@@ -16,7 +16,7 @@ const newEmotes = require('./json/newEmotes.json')
 const emoteDictionary = new Map()
 
 Object.keys(twitch).forEach((key) => {
-  emoteDictionary.set(key, { file: `https://static-cdn.jtvnw.net/emoticons/v1/${twitch[key].code}/1.0`, source: 'Twitch' })
+  emoteDictionary.set(key, { file: `https://static-cdn.jtvnw.net/emoticons/v2/${twitch[key].code}/default/dark/1.0`, source: 'Twitch' })
 })
 
 ffz.set.emoticons.forEach((emote) => {
