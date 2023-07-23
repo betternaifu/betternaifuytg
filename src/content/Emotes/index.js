@@ -106,7 +106,7 @@ class Emotes {
         for (let i = emoteCodes.length - 1; i >= 0; i--) {
           const code = emoteCodes[i]
           const emoteId = TwitchEmotes[code].code
-          const url = `https://static-cdn.jtvnw.net/emoticons/v1/${emoteId}/1.0`
+          const url = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteId}/default/dark/1.0`
           const source = 'Twitch'
           const style = this.styles[code]
           const height = TwitchEmotes[code].height
@@ -118,7 +118,7 @@ class Emotes {
           if (roll < 0.01) {
             const code = 'Kappa'
             const emoteId = '80393'
-            const url = `https://static-cdn.jtvnw.net/emoticons/v1/${emoteId}/1.0`
+            const url = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteId}/default/dark/1.0`
             const source = 'Twitch'
             const style = this.styles[code]
             const height = TwitchEmotes[code].height
