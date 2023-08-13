@@ -44,5 +44,5 @@
     "rainMoney": {"group":true,"left":0,"up":0},
     "Partying": {"group":false,"left":0,"up":0},
     "vp": {"group":false,"left":0,"up":0},
-    "spiderPav": {"group":true,"left":0,"up":0}
+    "spiderPav": {"group":false,"left":0,"up":0}
 }
