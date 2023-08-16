@@ -79,7 +79,7 @@ class ChatWatcher extends EventEmitter {
       this.getContainer()
         .then(() => {
           if (!activated && PersistentSyncStorage.data.options.liveChatByDefault) {
-            document.getElementById('label').click()
+            document.querySelector("[aria-label='Live Chat mode selection']").click() // wait to see if getElementById('trigger') is viable
             document.getElementById('contentWrapper').children[0].children[0].children[1].click()
           };
           this.watchContainer()
@@ -87,6 +87,7 @@ class ChatWatcher extends EventEmitter {
           this.getChatContainer().then(() => {
             this.toggleMessages()
             this.toggleAvatars()
+            this.toggleReactions()
             Emotes.init(!activated).then(() => { Emotes.loadEmotes() })
           })
             .then(waitForEmotes)
@@ -105,7 +106,7 @@ class ChatWatcher extends EventEmitter {
                 if (tabComplete || disableAutoEmoji) {
                   const restricted = document.querySelector('yt-live-chat-restricted-participation-renderer') // unsure if this is still rendered
                   if (restricted) { console.info('Live chat input is restricted.') } else {
-                    const input = document.getElementById('input')?.children[1]
+                    const input = document.querySelector('yt-live-chat-text-input-field-renderer#input')?.children[1]
                     if (input) {
                       if (tabComplete) {
                         this.completer = new TabCompleter(input)
@@ -128,7 +129,7 @@ class ChatWatcher extends EventEmitter {
                 this.authorAvatar = document.querySelector('yt-live-chat-message-input-renderer #avatar #img')?.src || null
               } else { // ugly workaround for tab completion breaking on first init after waitForEmotes implemented
                 this.source = 'chat-refresh'
-                setTimeout(() => { document.getElementById('label').click(); document.querySelector("[aria-selected='true']").click() }, 100) // again, replacing '.dropdown-trigger'
+                setTimeout(() => { document.querySelector('.dropdown-trigger').click(); document.querySelector("[aria-selected='true']").click() }, 100)
               }
             })
         })
@@ -196,7 +197,7 @@ class ChatWatcher extends EventEmitter {
     const button = document.createElement('div')
     button.id = 'refreshButton'
     button.addEventListener('click', () => {
-      document.getElementById('label').click()
+      document.querySelector('.dropdown-trigger').click() // wait to see if getElementById('trigger') is viable
       document.querySelector("[aria-selected='true']").click()
       document.getElementById('refreshButtonContainer').setAttribute('data-tooltip', 'Refreshing...')
       console.log('Chat refreshed')
@@ -208,7 +209,7 @@ class ChatWatcher extends EventEmitter {
 
     buttonContainer.addEventListener('keydown', (key) => {
       if (key.code === 'Space' || key.code === 'Enter' || key.code === 'NumpadEnter') {
-        document.getElementById('label').click()
+        document.querySelector('.dropdown-trigger').click() // wait to see if getElementById('trigger') is viable
         document.querySelector("[aria-selected='true']").click()
         document.getElementById('refreshButtonContainer').setAttribute('data-tooltip', 'Refreshing...')
         console.log('Chat refreshed')
