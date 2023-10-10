@@ -301,5 +301,8 @@
 	"SoSpooky": {"code":"emotesv2_bb4da7d0004144b19dec12d6b47622f3","height":28,"width":28},
 	"WheelDark": {"code":"emotesv2_50216bea724a4c27b5f565cde194ca36","height":28,"width":28},
 	"WheelLight": {"code":"emotesv2_2e0f78f68ef94d6da575318c5786e06a","height":28,"width":28},
-	"YordleShred": {"code":"emotesv2_3ee7a4872e4a46449884c5cef4c1d944","height":28,"width":28}
+	"YordleShred": {"code":"emotesv2_3ee7a4872e4a46449884c5cef4c1d944","height":28,"width":28},
+	"BlowTheWhistle": {"code":"emotesv2_d0d72de2c28840d39a628314f483f521","height":28,"width":28},
+	"FlawlessVictory": {"code":"emotesv2_0cb91e8a01c741fe9d4a0607f70395db","height":28,"width":28},
+	"PopNemo": {"code":"emotesv2_5d523adb8bbb4786821cd7091e47da21","height":28,"width":28}
 }
