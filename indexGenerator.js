@@ -32,7 +32,7 @@ Object.keys(dictionary).forEach((key) => {
 })
 
 // Generating HTML for each section of the dictionary
-const tableCell = ({ code, file, source }) => `<div class="cell"><div class="emote"><img class="emote" alt="${code}" src="${file}"></div><code>${code}</code><div class="source">${source}</div></div>`
+const tableCell = ({ code, file, source }) => `<div class="cell"><div class="emote"><img class="emote" alt="${code}" src="${file}" loading="lazy"></div><code>${code}</code><div class="source">${source}</div></div>`
 
 const tableTemplate = (title, emotes) => `
 <h2>${title}</h2>
@@ -41,7 +41,7 @@ ${emotes.map(emote => tableCell(emote)).join('\n')}
 </div></div>
 `
 
-const specialCell = ({ code, file, source }) => `<div class="cell special"><div class="special emote"><img alt="${code}" src="${file}"></div><code>${code}</code></div>`
+const specialCell = ({ code, file, source }) => `<div class="cell special"><div class="special emote"><img alt="${code}" src="${file}" loading="lazy"></div><code>${code}</code></div>`
 
 const specialTemplate = (title, emotes) => `
 <h3>${title}</h3>
