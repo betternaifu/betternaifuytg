@@ -12,13 +12,13 @@ class Emote {
     if (prefixed && this.style) {
       return (`
       <span class="BYTG-Emote" custom-tooltip-text="${this.code}">
-      <img class="bytg-img" src="${this.url}" alt="${this.code}" title="${this.code + this.source}" style="margin-left: -${calcWidth.toString()}px;${calcHeight ? ' margin-top: -' + calcHeight.toString() + 'px;' : ''}">
+        <img class="bytg-img" src="${this.url}" alt="${this.code}" title="${this.code + this.source}" style="margin-left: -${calcWidth.toString()}px;${calcHeight ? ' margin-top: -' + calcHeight.toString() + 'px;' : ''}">
       </span>
       `).trim()
     } else {
       return (`
       <span class="BYTG-Emote" custom-tooltip-text="${this.code}">
-      <img class="bytg-img" src="${this.url}" alt="${this.code}" title="${this.code + this.source}">
+        <img class="bytg-img" src="${this.url}" alt="${this.code}" title="${this.code + this.source}">
       </span>
       `).trim()
     }

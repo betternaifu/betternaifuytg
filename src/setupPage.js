@@ -38,8 +38,8 @@ const setupComplete = () => {
 const iframe = document.getElementById('options')
 
 const setDims = (event) => {
-  iframe.height = '520'
-  iframe.width = '394'
+  iframe.height = '555'
+  iframe.width = '395'
 }
 
 const iframeLoaded = (event) => {

@@ -25,6 +25,8 @@ const CONFIG = {
     disableAutoEmoji: false,
     hideMessages: false,
     hideReactions: false,
+    showOverflow: true,
+    enableHats: true,
 
     // Site Options
     enableYoutubeGaming: true,

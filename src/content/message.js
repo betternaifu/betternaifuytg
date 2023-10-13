@@ -1,8 +1,9 @@
 import PersistentSyncStorage from 'src/helpers/PersistentSyncStorage'
 
 class Message {
-  constructor (messageNode, messageType, source, emotes, authorAvatar) {
+  constructor (messageNode, messageType, source, emotes, authorAvatar, hat) {
     this.emotes = emotes
+    this.hat = hat
     this.node = messageNode
     this.messageType = messageType
     this.id = this.node.id // this.id should not be used to reference the node, dom id changes due to optimistic updates
@@ -73,6 +74,10 @@ class Message {
           this.node.setAttribute('bytg-id', this.id)
           this.insertMentions()
           this.setHtml()
+        }
+
+        if ((this.messageType === 'message' || this.messageType === 'redeem' || this.messageType === 'participant') && PersistentSyncStorage.data.options.enableHats) {
+          this.insertHat()
         }
       }
     })
@@ -524,7 +529,7 @@ class Message {
     }
     const waitForImage = new Promise(checkForImage)
     waitForImage.then(() => {
-      let imageSrc = this.node.querySelector('#img').src
+      const imageSrc = this.node.querySelector('#img').src
       const parsedURLId = imageSrc.match(/(?<=[/])[a-zA-Z0-9-_]*(?==)/)[0]
       const colorId = parsedURLId[Math.floor(parsedURLId.length / 2)]
       if (colorId) {
@@ -534,6 +539,28 @@ class Message {
         console.warn(`Couldn't get colorID from ${parsedURLId[parsedURLId.length / 2]} url`)
       }
     })
+  }
+
+  insertHat () {
+    if (this.hat) {
+      const checkForImage = (res, rej) => {
+        const imgElt = this.node.querySelector('#img')
+        if (imgElt !== null && imgElt.src[0] === 'h') {
+          res()
+        } else {
+          setTimeout(checkForImage.bind(this, res, rej), 10)
+        }
+      }
+      const waitForImage = new Promise(checkForImage)
+      waitForImage.then(() => {
+        const pfp = this.node.querySelector('yt-img-shadow#author-photo')
+        const hat = document.createElement('img')
+        pfp.parentElement.insertBefore(hat, pfp.nextSibling)
+        hat.classList.add('bytg-img', 'bytg-hat')
+        hat.style = this.hat.style
+        hat.src = this.hat.url
+      })
+    }
   }
 
   parseIllegalCharacters (word) {
