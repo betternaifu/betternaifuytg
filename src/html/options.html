@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="chrome://browser/content/extension.css">
   </head>
   <body>
-
 		<div class="section">
       <h3 class="options-heading">Chat Options</h3>
       <div class="options-description">Changes apply to new messages (refresh chat to apply to all)</div>
@@ -22,6 +21,11 @@
 					<div class="option-cell"><label for="disableAvatars">Hide profile pictures in chat (<em>click to toggle</em>)</label></div>
 					<div class="option-cell"><input disabled type="checkbox"
 					id="disableAvatars" class="option-input"></div>
+				</div>
+
+        <div class="option-row">
+					<div class="option-cell"><label for="enableHats">Enable seasonal profile picture decorations</label></div>
+					<div class="option-cell"><input disabled type="checkbox" id="enableHats" class="option-input"></div>
 				</div>
 
 				<div class="option-row">
@@ -41,13 +45,17 @@
 
         <div class="option-row">
 					<div class="option-cell"><label for="hideMessages">Hide non-member messages (<em>click to toggle</em>)</label></div>
-					<div class="option-cell"><input disabled type="checkbox"
-					id="hideMessages" class="option-input"></div>
+					<div class="option-cell"><input disabled type="checkbox" id="hideMessages" class="option-input"></div>
 				</div>
 
         <div class="option-row">
           <div class="option-cell"><label for="hideReactions">Hide emoji reactions panel (<em>click to toggle</em>)</label></div>
           <div class="option-cell"><input disabled type="checkbox" id="hideReactions" class="option-input"></div>
+        </div>
+
+        <div class="option-row">
+          <div class="option-cell"><label for="showOverflow">Enable overflow for messages w/o hovering (<em>click to toggle</em>)</label></div>
+          <div class="option-cell"><input disabled type="checkbox" id="showOverflow" class="option-input"></div>
         </div>
 
 				<div class="option-row">

@@ -37,7 +37,7 @@ class ChatWatcher extends EventEmitter {
 
     this.avatarSheet = document.createElement('style')
     this.avatarSheet.id = 'bytg-avatar-sheet'
-    this.avatarSheet.innerHTML = 'yt-live-chat-text-message-renderer.yt-live-chat-item-list-renderer>yt-img-shadow#author-photo, ytd-sponsorships-live-chat-gift-redemption-announcement-renderer.yt-live-chat-item-list-renderer>yt-img-shadow#author-photo {display: none;};'
+    this.avatarSheet.innerHTML = 'yt-live-chat-text-message-renderer.yt-live-chat-item-list-renderer>yt-img-shadow#author-photo, ytd-sponsorships-live-chat-gift-redemption-announcement-renderer.yt-live-chat-item-list-renderer>yt-img-shadow#author-photo, .bytg-hat {display: none;};'
 
     this.messageSheet = document.createElement('style')
     this.messageSheet.id = 'bytg-message-sheet'
@@ -47,11 +47,16 @@ class ChatWatcher extends EventEmitter {
     this.reactionSheet.id = 'bytg-reaction-sheet'
     this.reactionSheet.innerHTML = '#reaction-control-panel-overlay.yt-live-chat-renderer {display: none;}'
 
+    this.overflowSheet = document.createElement('style')
+    this.overflowSheet.id = 'bytg-overflow-sheet'
+    this.overflowSheet.innerHTML = 'yt-live-chat-text-message-renderer.yt-live-chat-item-list-renderer, yt-live-chat-text-message-renderer.yt-live-chat-banner-renderer {overflow: initial; contain: none;};' // include #container.yt-live-chat-participant-renderer for participants list?
+
     this._participantList = null
     this._participantsWatcher = null
     this.watchParticipants = this.watchParticipants.bind(this)
 
     this.emotes = null
+    this.hats = null
 
     this.authorAvatar = null
 
@@ -59,6 +64,7 @@ class ChatWatcher extends EventEmitter {
       this.toggleAvatars()
       this.toggleMessages()
       this.toggleReactions()
+      this.toggleOverflow()
     })
     // yt-live-chat-ninja-message-renderer shows up when you popout chat
     // yt-live-chat-toast-container for mobile?
@@ -79,8 +85,7 @@ class ChatWatcher extends EventEmitter {
       this.getContainer()
         .then(() => {
           if (!activated && PersistentSyncStorage.data.options.liveChatByDefault) {
-            document.querySelector("[aria-label='Live Chat mode selection']").click() // wait to see if getElementById('trigger') is viable
-            document.getElementById('contentWrapper').children[0].children[0].children[1].click()
+            document.querySelectorAll('tp-yt-paper-listbox > a')[1]?.click() // wait to see if getElementById('trigger') is viable
           };
           this.watchContainer()
           this.injectButtons()
@@ -88,11 +93,15 @@ class ChatWatcher extends EventEmitter {
             this.toggleMessages()
             this.toggleAvatars()
             this.toggleReactions()
+            this.toggleOverflow()
             Emotes.init(!activated).then(() => { Emotes.loadEmotes() })
           })
             .then(waitForEmotes)
             .then(() => {
               this.emotes = Emotes
+              this.hats = Emotes.hats
+            })
+            .then(() => {
               if (activated) {
                 this.watchChat()
                 this.parsePreloadedMessages()
@@ -129,7 +138,7 @@ class ChatWatcher extends EventEmitter {
                 this.authorAvatar = document.querySelector('yt-live-chat-message-input-renderer #avatar #img')?.src || null
               } else { // ugly workaround for tab completion breaking on first init after waitForEmotes implemented
                 this.source = 'chat-refresh'
-                setTimeout(() => { document.querySelector('.dropdown-trigger').click(); document.querySelector("[aria-selected='true']").click() }, 100)
+                setTimeout(() => { document.querySelector('tp-yt-paper-listbox > a[aria-selected=\'true\']')?.click() }, 100)
               }
             })
         })
@@ -197,8 +206,7 @@ class ChatWatcher extends EventEmitter {
     const button = document.createElement('div')
     button.id = 'refreshButton'
     button.addEventListener('click', () => {
-      document.querySelector('.dropdown-trigger').click() // wait to see if getElementById('trigger') is viable
-      document.querySelector("[aria-selected='true']").click()
+      document.querySelector('tp-yt-paper-listbox > a[aria-selected=\'true\']')?.click() // wait to see if getElementById('trigger') is viable
       document.getElementById('refreshButtonContainer').setAttribute('data-tooltip', 'Refreshing...')
       console.log('Chat refreshed')
     })
@@ -209,8 +217,7 @@ class ChatWatcher extends EventEmitter {
 
     buttonContainer.addEventListener('keydown', (key) => {
       if (key.code === 'Space' || key.code === 'Enter' || key.code === 'NumpadEnter') {
-        document.querySelector('.dropdown-trigger').click() // wait to see if getElementById('trigger') is viable
-        document.querySelector("[aria-selected='true']").click()
+        document.querySelector('tp-yt-paper-listbox > a[aria-selected=\'true\']')?.click() // wait to see if getElementById('trigger') is viable
         document.getElementById('refreshButtonContainer').setAttribute('data-tooltip', 'Refreshing...')
         console.log('Chat refreshed')
       }
@@ -477,7 +484,9 @@ class ChatWatcher extends EventEmitter {
   }
 
   onNewMessage (node, messageType, source) {
-    const message = new Message(node, messageType, source, this.emotes, this.authorAvatar)
+    const hats = this.hats ? Object.keys(this.hats) : null
+    const hat = hats ? this.hats[hats[Math.floor(hats.length * Math.random())]] : null
+    const message = new Message(node, messageType, source, this.emotes, this.authorAvatar, hat)
   }
 
   isMessageNode (node) {
@@ -516,6 +525,10 @@ class ChatWatcher extends EventEmitter {
     if (!document.getElementById('bytg-reaction-sheet')) document.body.appendChild(this.reactionSheet)
   }
 
+  showOverflow () {
+    if (!document.getElementById('bytg-overflow-sheet')) document.body.appendChild(this.overflowSheet)
+  }
+
   showAvatars () {
     const sheetPresent = document.getElementById('bytg-avatar-sheet')
     if (sheetPresent) {
@@ -532,6 +545,13 @@ class ChatWatcher extends EventEmitter {
 
   showReactions () {
     const sheetPresent = document.getElementById('bytg-reaction-sheet')
+    if (sheetPresent) {
+      sheetPresent.parentNode.removeChild(sheetPresent)
+    }
+  }
+
+  hideOverflow () {
+    const sheetPresent = document.getElementById('bytg-overflow-sheet')
     if (sheetPresent) {
       sheetPresent.parentNode.removeChild(sheetPresent)
     }
@@ -558,6 +578,14 @@ class ChatWatcher extends EventEmitter {
       this.hideReactions()
     } else {
       this.showReactions()
+    }
+  }
+
+  toggleOverflow () {
+    if (PersistentSyncStorage.data.options.showOverflow) {
+      this.showOverflow()
+    } else {
+      this.hideOverflow()
     }
   }
 }

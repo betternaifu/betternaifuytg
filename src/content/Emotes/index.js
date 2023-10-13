@@ -31,6 +31,7 @@ class Emotes {
     this.dictionary = new Map()
     this.init = this.init.bind(this)
     this.blacklist = new Map()
+    this.hats = null
   }
 
   init (suppress) {
@@ -43,8 +44,7 @@ class Emotes {
     this.loadedTwitch = null
     this.loadedBTTV = null
     this.loadedFFZ = null
-    this.loadedCustom = null
-    this.loadedCustom = null
+    this.loadedHats = null
     return Promise.all([
       PersistentSyncStorage.data.options.enableBetterYTGEmotes &&
         this.loadDimensions(),
@@ -65,7 +65,9 @@ class Emotes {
       PersistentSyncStorage.data.options.enableBetterYTGEmotes &&
         this.loadBetterYTG(),
       PersistentSyncStorage.data.options.emoteBlacklist &&
-        this.loadBlacklist()
+        this.loadBlacklist(),
+      PersistentSyncStorage.data.options.enableHats &&
+        this.loadHats()
     ])
   }
 
@@ -76,7 +78,8 @@ class Emotes {
     const loadedTwitch = (this.loadedTwitch != null) || !PersistentSyncStorage.data.options.enableTwitchEmotes
     const loadedBTTV = (this.loadedBTTV != null) || !PersistentSyncStorage.data.options.enableBTTVEmotes
     const loadedFFZ = (this.loadedFFZ != null) || !PersistentSyncStorage.data.options.enableFFZEmotes
-    return loadedDims && loadedStyles && loadedBetterYTGEmotes && loadedTwitch && loadedBTTV && loadedFFZ
+    const loadedHats = (this.loadedHats != null) || !PersistentSyncStorage.data.options.enableHats
+    return loadedDims && loadedStyles && loadedBetterYTGEmotes && loadedTwitch && loadedBTTV && loadedFFZ && loadedHats
   }
 
   loadStyles () {
@@ -95,7 +98,17 @@ class Emotes {
         this.dimensions = dims
         if (!this.suppressLogging) console.log('Loaded dimensions')
         res()
-      }).catch(() => { if (!this.suppressLogging) console.log('Failed to load dimensions'); this.dimensions = false; res() })
+      }).catch((err) => { if (!this.suppressLogging) console.log(`Failed to load dimensions:\n${err}`); this.dimensions = false; res() })
+    })
+  }
+
+  loadHats () {
+    return new Promise((res) => {
+      fetchDict('hats').then(hats => {
+        this.hats = hats
+        if (!this.suppressLogging) console.log('Fetched hats')
+        res()
+      }).catch((err) => { if (!this.suppressLogging) console.log(`Failed to fetch hats:\n${err}`); this.loadedHats = false; res() })
     })
   }
 
@@ -121,15 +134,15 @@ class Emotes {
             const url = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteId}/default/dark/1.0`
             const source = 'Twitch'
             const style = this.styles[code]
-            const height = TwitchEmotes[code].height
-            const width = TwitchEmotes[code].width
+            const height = 28
+            const width = 22
             this.dictionary.set('Kappa', new Emote({ code, url, source, style, height, width }))
             console.log('You struck gold!')
           }
         }
         if (!this.suppressLogging) console.log('Loaded Twitch emotes')
         res()
-      }).catch(() => { if (!this.suppressLogging) console.log('Failed to load Twitch emotes'); this.loadedTwitch = false; res() })
+      }).catch((err) => { if (!this.suppressLogging) console.log(`Failed to load Twitch emotes:\n${err}`); this.loadedTwitch = false; res() })
     })
   }
 
@@ -149,7 +162,7 @@ class Emotes {
         }
         if (!this.suppressLogging) console.log('Loaded FFZ emotes')
         res()
-      }).catch(() => { if (!this.suppressLogging) console.log('Failed to load FFZ emotes'); this.loadedFFZ = false; res() })
+      }).catch((err) => { if (!this.suppressLogging) console.log(`Failed to load FFZ emotes:\n${err}`); this.loadedFFZ = false; res() })
     })
   }
 
@@ -168,7 +181,7 @@ class Emotes {
         }
         if (!this.suppressLogging) console.log('Loaded BTTV emotes')
         res()
-      }).catch(() => { if (!this.suppressLogging) console.log('Failed to load BTTV emotes'); this.loadedBTTV = false; res() })
+      }).catch((err) => { if (!this.suppressLogging) console.log(`Failed to load BTTV emotes:\n${err}`); this.loadedBTTV = false; res() })
     })
   }
 
@@ -188,7 +201,7 @@ class Emotes {
         }
         if (!this.suppressLogging) console.log('Loaded custom emotes')
         res()
-      }).catch(() => { if (!this.suppressLogging) console.log('Failed to load custom emotes'); this.loadedCustom = false; res() })
+      }).catch((err) => { if (!this.suppressLogging) console.log(`Failed to load custom emotes:\n${err}`); this.loadedCustom = false; res() })
     })
   }
 
