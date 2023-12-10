@@ -6,12 +6,12 @@
 	},
 	"Wreath": {
 		"url": "https://cdn.jsdelivr.net/gh/betternaifu/betternaifuytg@latest/assets/images/wreath.webp",
-		"style": "position:fixed;margin-left:-5px;margin-top:-5px;",
+		"style": "position:fixed;height:40px;margin-left:-5px;margin-top:-5px;",
 		"active": true
 	},
 	"Muffler": {
 		"url": "https://cdn.jsdelivr.net/gh/betternaifu/betternaifuytg@latest/assets/images/scuffed.webp",
-		"style": "position:fixed;margin-left:-1px;margin-top:8px;",
+		"style": "position:fixed;height:24px;margin-left:-1px;margin-top:8px;",
 		"active": true
 	}
 }
