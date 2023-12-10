@@ -1,1 +1,17 @@
-{}
+{
+	"SantaHat": {
+		"url": "https://cdn.betterttv.net/emote/58487cc6f52be01a7ee5f205/1x.webp",
+		"style": "position:fixed;height:28px;margin-left:-13px;margin-top:-2px;",
+		"active": true
+	},
+	"Wreath": {
+		"url": "https://cdn.jsdelivr.net/gh/betternaifu/betternaifuytg@latest/assets/images/wreath.webp",
+		"style": "position:fixed;margin-left:-35px;margin-top:-5px;",
+		"active": true
+	},
+	"Muffler": {
+		"url": "https://cdn.jsdelivr.net/gh/betternaifu/betternaifuytg@latest/assets/images/scuffed.webp",
+		"style": "position:fixed;margin-left:-1px;margin-top:4px;",
+		"active": true
+	}
+}
