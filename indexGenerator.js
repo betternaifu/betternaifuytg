@@ -137,12 +137,16 @@ fs.writeFile(filePath, htmlstring, /* { flag: "wx" }, */ function (err) {
 const total = Object.keys(dictionary).length
 sizeOf.setConcurrency(Math.ceil(total / 1000) * 1000)
 let dims = ''
+let custom = ''
 for (let i = 0; i < emoteKeys.length; i++) {
   const code = emoteKeys[i]
   const emote = emoteDictionary.get(code)
   const path = emote.file
   if (emote.source === 'Custom') {
-    sizeOf(`${path}`).then(dimensions => { dims += `\t"${code.replace('\\', '\\\\')}":{"height":${dimensions.height},"width":${dimensions.width}},\n` }).catch(err => console.log(err))
+    sizeOf(`${path}`).then(dimensions => {
+      dims += `\t"${code.replace('\\', '\\\\')}":{"height":${dimensions.height},"width":${dimensions.width}},\n`
+      custom += `\t"${code.replace('\\', '\\\\')}":{"asset":"${path.split('/').pop()}","height":${dimensions.height},"width":${dimensions.width}},\n`
+    }).catch(err => console.log(err))
   }
 }
 let attempts = 0
@@ -155,6 +159,14 @@ waitForDims.then(() => {
       console.log("File '" + dimFile + "' couldn't be overwritten (or some other error occurred). Aborted!")
     } else {
       console.log('Done, saved to ' + dimFile)
+      const customFile = process.cwd() + '/json/custom.json'
+      fs.writeFile(customFile, `{\n${custom.substring(0, custom.length - 2)}\n}`, 'utf8', function (err) {
+        if (err) {
+          console.log("File '" + customFile + "' couldn't be overwritten (or some other error occurred). Aborted!")
+        } else {
+          console.log('Done, saved to ' + customFile)
+        }
+      })
     }
   })
 }).catch((val) => {
