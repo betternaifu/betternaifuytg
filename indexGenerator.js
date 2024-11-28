@@ -1,34 +1,41 @@
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
+import { createRequire } from 'module'
+
+if (process.argv.some((value) => value === '-s' || value === '--silent')) console.log = () => {}
+const require = createRequire(import.meta.url)
 
 const fs = require('fs')
 
 const { promisify } = require('util')
 const sizeOf = promisify(require('image-size'))
 
-const dictionary = require('./json/dictionary.json')
-const bttv = require('./json/bttv.json')
-const ffz = require('./json/ffz.json')
-const twitch = require('./json/twitch.json')
+const EMOTE_SETS = ['Twitch', 'FFZ', 'BTTV', 'Custom']
+const ATTRIBUTE_SETS = ['styles', 'newEmotes']
+const JSON_DATA = {}
+for (const setName of EMOTE_SETS) {
+  JSON_DATA[setName] = require(`./json/src/${setName === 'Custom' ? 'dictionary' : setName.toLowerCase()}.json`)
+}
+for (const setName of ATTRIBUTE_SETS) {
+  JSON_DATA[setName] = require(`./json/src/${setName}.json`)
+}
 
-const newEmotes = require('./json/newEmotes.json')
+const styles = JSON_DATA.styles
 
 const emoteDictionary = new Map()
 
-Object.keys(twitch).forEach((key) => {
-  emoteDictionary.set(key, { file: `https://static-cdn.jtvnw.net/emoticons/v2/${twitch[key].code}/default/dark/1.0`, source: 'Twitch' })
+Object.entries(JSON_DATA.Twitch).forEach((emote) => {
+  emoteDictionary.set(emote[0], { file: `https://static-cdn.jtvnw.net/emoticons/v2/${emote[1].code}/default/dark/1.0`, source: 'Twitch' })
 })
 
-ffz.set.emoticons.forEach((emote) => {
+JSON_DATA.FFZ.set.emoticons.forEach((emote) => {
   emoteDictionary.set(emote.name, { file: `https://cdn.frankerfacez.com/emote/${emote.id}/1`, source: 'FFZ' })
 })
 
-Object.keys(bttv).forEach((emote) => {
-  emoteDictionary.set(emote, { file: bttv[emote].url, source: 'BTTV' })
+Object.entries(JSON_DATA.BTTV).forEach((emote) => {
+  emoteDictionary.set(emote[0], { file: emote[1].url, source: 'BTTV' })
 })
 
-Object.keys(dictionary).forEach((key) => {
-  emoteDictionary.set(key, { file: `assets/images/${dictionary[key]}`, source: 'Custom' })
+Object.entries(JSON_DATA.Custom).forEach((emote) => {
+  emoteDictionary.set(emote[0], { file: `assets/images/${emote[1]}`, source: 'Custom' })
 })
 
 // Generating HTML for each section of the dictionary
@@ -61,7 +68,7 @@ const special = /[^A-Za-z0-9\s]/
 
 // New & Updated
 const newUpdatedEmotes = emoteKeys
-  .filter(code => code in newEmotes)
+  .filter(code => code in JSON_DATA.newEmotes)
   .map(emoteToObj)
 
 // Special
@@ -123,7 +130,7 @@ htmlstring += `
 </body>
 </html>`
 
-// Write out
+// Write out index
 const filePath = process.cwd() + '/index.html'
 fs.writeFile(filePath, htmlstring, /* { flag: "wx" }, */ function (err) {
   if (err) {
@@ -133,54 +140,76 @@ fs.writeFile(filePath, htmlstring, /* { flag: "wx" }, */ function (err) {
   }
 })
 
-// Update dims.json
-const total = Object.keys(dictionary).length
+// Update dims + add styles
+const total = Object.keys(JSON_DATA.Custom).length
 sizeOf.setConcurrency(Math.ceil(total / 1000) * 1000)
-let dims = ''
-let custom = ''
+const dims = {}
 for (let i = 0; i < emoteKeys.length; i++) {
   const code = emoteKeys[i]
   const emote = emoteDictionary.get(code)
   const path = emote.file
-  if (emote.source === 'Custom') {
+  const source = emote.source
+  if (source === 'Custom') {
     sizeOf(`${path}`).then(dimensions => {
-      dims += `\t"${code.replace('\\', '\\\\')}":{"height":${dimensions.height},"width":${dimensions.width}},\n`
-      custom += `\t"${code.replace('\\', '\\\\')}":{"asset":"${path.split('/').pop()}","height":${dimensions.height},"width":${dimensions.width}},\n`
+      dims[code] = { height: dimensions.height, width: dimensions.width }
+      JSON_DATA[source][code] = { asset: path.split('/').pop(), height: dimensions.height, width: dimensions.width }
+      if (code in styles) JSON_DATA[source][code].style = styles[code]
     }).catch(err => console.log(err))
+  } else if (source === 'BTTV') {
+    if (code in styles) JSON_DATA[source][code].style = styles[code]
+  } else if (source === 'FFZ') {
+    if (code in styles) {
+      for (let j = 0; j < JSON_DATA[source].set.emoticons.length; j++) {
+        if (JSON_DATA[source].set.emoticons[j].name === code) JSON_DATA[source].set.emoticons[j].style = styles[code]
+      }
+    }
+  } else if (source === 'Twitch') {
+    if (code in styles) JSON_DATA[source][code].style = styles[code]
   }
 }
+
+// Write out JSON files
 let attempts = 0
-const checkForDims = (res, rej) => { if (dims.split('\n').length - 1 >= total) { res(0) } else { if (attempts < 10) { console.log(`Missing ${total - dims.split('\n').length + 1} image size(s)`); attempts += 1; setTimeout(checkForDims.bind(this, res, rej), 100) } else { rej(total - dims.split('\n').length + 1) } } }
+const checkForDims = (res, rej) => { if (Object.keys(dims).length >= total) { res(0) } else { if (attempts < 10) { console.log(`Waiting for ${total - Object.keys(dims).length} image size(s)...`); attempts += 1; setTimeout(checkForDims.bind(this, res, rej), 100) } else { rej(total - Object.keys(dims).length) } } }
 const waitForDims = new Promise(checkForDims)
 waitForDims.then(() => {
   const dimFile = process.cwd() + '/json/dims.json'
-  fs.writeFile(dimFile, `{\n${dims.substring(0, dims.length - 2)}\n}`, 'utf8', function (err) {
+  fs.writeFile(dimFile, JSON.stringify(dims, null, 2), 'utf8', function (err) {
     if (err) {
       console.log("File '" + dimFile + "' couldn't be overwritten (or some other error occurred). Aborted!")
     } else {
       console.log('Done, saved to ' + dimFile)
-      const customFile = process.cwd() + '/json/custom.json'
-      fs.writeFile(customFile, `{\n${custom.substring(0, custom.length - 2)}\n}`, 'utf8', function (err) {
-        if (err) {
-          console.log("File '" + customFile + "' couldn't be overwritten (or some other error occurred). Aborted!")
-        } else {
-          console.log('Done, saved to ' + customFile)
-        }
-      })
     }
   })
+  for (const setName of EMOTE_SETS) {
+    const filePath = `${process.cwd()}/json/${setName.toLowerCase()}.json`
+    const jsonData = JSON_DATA[setName]
+    fs.writeFile(filePath, JSON.stringify(jsonData, null, 2), 'utf8', function (err) {
+      if (err) {
+        console.log("File '" + filePath + "' couldn't be overwritten (or some other error occurred). Aborted!")
+      } else {
+        console.log('Done, saved to ' + filePath)
+      }
+    })
+  }
 }).catch((val) => {
-  const dimFile = process.cwd() + '/json/dims.json'
-  fs.writeFile(dimFile, `{\n${dims.substring(0, dims.length - 2)}\n}`, 'utf8', function (err) {
-    if (err) {
-      console.log("File '" + dimFile + "' couldn't be overwritten (or some other error occurred). Aborted!")
-    } else {
-      console.log('Done, saved to ' + dimFile)
-    }
-  })
   if (val > 0) {
     console.log(`Missing ${val} image size(s).`)
-    const missing = Object.keys(dictionary).filter(x => !dims.split('\n').filter(x => x.length > 0).map(x => x.split('\t')[1].split('":"')[0].split('"')[1].replace('\\\\', '\\')).includes(x))
+    const missing = Object.keys(JSON_DATA.Custom).filter(x => !Object.keys(dims).includes(x))
     console.log(missing.map(x => [x, emoteDictionary.get(x).file]))
   }
 })
+
+// Keep until fully migrated to keeping styles in emote set JSON
+const TO_COPY = ['styles', 'hats', 'dictionary']
+for (const file of TO_COPY) {
+  const filePath = `${process.cwd()}/json/${file}.json`
+  const jsonData = require(`./json/src/${file}.json`)
+  fs.writeFile(filePath, JSON.stringify(jsonData, null, 2), 'utf8', function (err) {
+    if (err) {
+      console.log("File '" + filePath + "' couldn't be overwritten (or some other error occurred). Aborted!")
+    } else {
+      console.log('Done, saved to ' + filePath)
+    }
+  })
+}
