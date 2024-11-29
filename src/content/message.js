@@ -28,7 +28,7 @@ class Message {
     this.authorAvatar = authorAvatar
 
     const checkForEmotes = (res) => {
-      if (this.emotes?.dictionary.size || this.emotes?.doneLoading()) {
+      if (this.emotes?.doneLoading()) {
         res()
       } else {
         setTimeout(checkForEmotes.bind(this, res), 100)
