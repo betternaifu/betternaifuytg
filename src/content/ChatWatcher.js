@@ -45,11 +45,20 @@ class ChatWatcher extends EventEmitter {
 
     this.reactionSheet = document.createElement('style')
     this.reactionSheet.id = 'bytg-reaction-sheet'
-    this.reactionSheet.innerHTML = '#reaction-control-panel-overlay.yt-live-chat-renderer {display: none;}'
+    this.reactionSheet.innerHTML = '#reaction-control-panel-overlay.yt-live-chat-renderer, yt-reaction-control-panel-overlay-view-model {display: none !important;}'
 
     this.overflowSheet = document.createElement('style')
     this.overflowSheet.id = 'bytg-overflow-sheet'
-    this.overflowSheet.innerHTML = 'yt-live-chat-text-message-renderer.yt-live-chat-item-list-renderer, yt-live-chat-text-message-renderer.yt-live-chat-banner-renderer {overflow: initial; contain: none;};' // include #container.yt-live-chat-participant-renderer for participants list?
+    this.overflowSheet.innerHTML = '.yt-live-chat-item-list-renderer, .yt-live-chat-banner-renderer {overflow: initial; contain: none;};' // include #container.yt-live-chat-participant-renderer for participants list?
+
+    this.popupMarker = document.createElement('style')
+    this.popupMarker.id = 'bytg-popup-marker'
+    this.popupMarker.innerHTML = ''
+
+    this._popupChat = null
+    this._popupChatWatcher = null
+    // this.watchPopupChat = this.watchPopupChat.bind(this)
+    // this._popupChatInput = null
 
     this._participantList = null
     this._participantsWatcher = null
@@ -71,21 +80,29 @@ class ChatWatcher extends EventEmitter {
   }
 
   init (emitEvent) {
+    this.retries = 0
     this.source = emitEvent
     const activated = emitEvent !== 'ready'
-    const checkForEmotes = (res) => {
-      if (this.emotes?.dictionary?.size || this.emotes?.doneLoading()) {
+
+    const checkForEmotes = (res, rej) => {
+      if (this.emotes?.doneLoading?.()) {
         res()
       } else {
-        setTimeout(checkForEmotes.bind(this, res), 100)
+        if (this.retries < 10) {
+          this.retries += 1
+          setTimeout(checkForEmotes.bind(this, res, rej), 100)
+        } else {
+          rej()
+        }
       }
     }
     const waitForEmotes = new Promise(checkForEmotes)
+
     return new Promise((res, rej) => {
       this.getContainer()
         .then(() => {
           if (!activated && PersistentSyncStorage.data.options.liveChatByDefault) {
-            document.querySelectorAll('tp-yt-paper-listbox > a')[1]?.click() // wait to see if getElementById('trigger') is viable
+            document.querySelectorAll('tp-yt-paper-listbox > a')[1]?.click?.() // wait to see if getElementById('trigger') is viable
           };
           this.watchContainer()
           this.injectButtons()
@@ -97,6 +114,7 @@ class ChatWatcher extends EventEmitter {
             Emotes.init(!activated).then(() => { Emotes.loadEmotes() })
           })
             .then(waitForEmotes)
+            .catch((err) => { console.warn(`Error initializing emotes. May need to refresh.\n${err}`) })
             .then(() => {
               this.emotes = Emotes
               this.hats = Emotes.hats
@@ -106,7 +124,7 @@ class ChatWatcher extends EventEmitter {
                 this.watchChat()
                 this.parsePreloadedMessages()
                 if (PersistentSyncStorage.data.options.fixMemoryLeaks) {
-                  chrome.runtime.sendMessage({ name: 'fixMemoryLeaks' }, (response) => { if (response)console.info('Trying memory leak fix.') })
+                  chrome.runtime.sendMessage({ name: 'fixMemoryLeaks' }, (response) => { if (response) console.info('Trying memory leak fix.') })
                 }
                 this.getBannerContainer().then(() => { this.watchBanner(); this.parsePreloadedPins() })
                 this.getTicker().then(() => { this.watchTicker() })
@@ -117,31 +135,238 @@ class ChatWatcher extends EventEmitter {
                   if (restricted) { console.info('Live chat input is restricted.') } else {
                     const input = document.querySelector('yt-live-chat-text-input-field-renderer#input')?.children[1]
                     if (input) {
-                      if (tabComplete) {
-                        this.completer = new TabCompleter(input)
-                        let arr = []
-                        waitForEmotes.then(() => { // dubious
+                      if (tabComplete) this.completer = new TabCompleter(input)
+                      waitForEmotes.then(() => { // dubious
+                        if (tabComplete) {
+                          let arr = []
                           Emotes.dictionary.forEach((value, key) => { arr.push({ name: key, url: value.url }) }) // sort while inserting for efficiency?
                           arr = arr.filter(x => !x.name.includes(' '))
                           arr.sort((a, b) => { return a.name.localeCompare(b.name) })
                           this.completer.init(arr)
-                        })
-                      }
-                      if (disableAutoEmoji) {
-                        chrome.runtime.sendMessage({ name: 'disableEmojiComplete' }, (response) => { if (response)console.info('Disabled Youtube emoji complete.') })
-                      }
+                        }
+                        if (disableAutoEmoji) {
+                          chrome.runtime.sendMessage({ name: 'disableEmojiComplete', emotes: Array.from(Emotes.dictionary.keys()) }, (response) => { if (response) console.info('Disabled Youtube emoji complete.') })
+                        }
+                      })
+                        .catch((err) => { console.warn(`Error initializing input. May need to refresh.\n${err}`) })
                     } else { console.info('No live chat input found.') }
                   }
                 }
                 this.getParticipants().then(() => { this.watchParticipants(); this.parsePreloadedParticipants() })
                 this.getDockedContainer().then(() => { this.watchDocker() })
                 this.authorAvatar = document.querySelector('yt-live-chat-message-input-renderer #avatar #img')?.src || null
+                this.addPopupMarker().then(() => {
+                  this.removePopupMarker().then(() => {
+                    this.getPopupChat().then(
+                      () => { this.watchPopupChat() },
+                      () => {}
+                    )
+                  })
+                })
               } else { // ugly workaround for tab completion breaking on first init after waitForEmotes implemented
                 this.source = 'chat-refresh'
-                setTimeout(() => { document.querySelector('tp-yt-paper-listbox > a[aria-selected=\'true\']')?.click() }, 100)
+                setTimeout(() => { document.querySelector('tp-yt-paper-listbox > a[aria-selected=\'true\']')?.click?.() }, 100)
               }
             })
+            .catch((err) => { console.warn(`Error initializing chat. May need to refresh.\n${err}`) })
         })
+    })
+  }
+
+  injectRefreshButton () { // could use yt's own material design version instead
+    if (document.getElementById('refreshButton')) return
+
+    const buttonContainer = document.createElement('div')
+    buttonContainer.setAttribute('data-tooltip', 'Refresh chat')
+    buttonContainer.setAttribute('tabindex', '0')
+    buttonContainer.id = 'refreshButtonContainer'
+    buttonContainer.className = 'tooltip-left'
+
+    const button = document.createElement('div')
+    button.id = 'refreshButton'
+    button.addEventListener('click', () => {
+      document.querySelector('tp-yt-paper-listbox > a[aria-selected=\'true\']')?.click?.() // wait to see if getElementById('trigger') is viable
+      document.getElementById('refreshButtonContainer').setAttribute('data-tooltip', 'Refreshing...')
+      console.log('Chat refreshed')
+    })
+    button.innerHTML = '<span class="material-icons">refresh</span>'
+    buttonContainer.appendChild(button)
+    document.getElementById('action-buttons').appendChild(buttonContainer)
+    button.style.display = 'flex'
+
+    buttonContainer.addEventListener('keydown', (key) => {
+      if (key.code === 'Space' || key.code === 'Enter' || key.code === 'NumpadEnter') {
+        document.querySelector('tp-yt-paper-listbox > a[aria-selected=\'true\']')?.click?.() // wait to see if getElementById('trigger') is viable
+        document.getElementById('refreshButtonContainer').setAttribute('data-tooltip', 'Refreshing...')
+        console.log('Chat refreshed')
+      }
+    })
+  }
+
+  injectOptionsButton () {
+    if (document.getElementById('optionsButton')) return
+
+    const buttonContainer = document.createElement('div')
+    buttonContainer.setAttribute('data-tooltip', 'BetterNaifuYTG options')
+    buttonContainer.setAttribute('tabindex', '0')
+    buttonContainer.id = 'optionsButtonContainer'
+    buttonContainer.className = 'tooltip-left'
+
+    const button = document.createElement('div')
+    button.id = 'optionsButton'
+    button.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ name: 'optionsPopup' })
+    })
+    button.innerHTML = '<span class="material-icons">settings</span>'
+    buttonContainer.appendChild(button)
+    document.getElementById('action-buttons').appendChild(buttonContainer)
+    button.style.display = 'flex'
+
+    buttonContainer.addEventListener('keydown', (key) => {
+      if (key.code === 'Space' || key.code === 'Enter' || key.code === 'NumpadEnter') {
+        chrome.runtime.sendMessage({ name: 'optionsPopup' })
+      }
+    })
+  }
+
+  injectButtons () {
+    this.injectRefreshButton()
+    this.injectOptionsButton()
+    document.getElementById('action-buttons').setAttribute('style', 'display: flex; gap: 10px')
+  }
+
+  getContainer () {
+    // Parent of yt-live-chat-item-list-renderer.style-scope.yt-live-chat-renderer that gets reset when live/top chat toggled
+    // Basically the chat container ancestor
+    const checkForContainer = (res, rej) => {
+      this._container = document.getElementById('item-list')
+      if (this._container !== null) {
+        res()
+      } else {
+        setTimeout(checkForContainer.bind(this, res, rej), 250)
+      }
+    }
+    return new Promise(checkForContainer)
+  }
+
+  watchContainer () {
+    let removed = false
+    let finished = false
+    if (this._overseer === null) {
+      this._overseer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (!finished) {
+            const { addedNodes, removedNodes } = mutation
+
+            if (typeof removedNodes !== 'undefined' && removedNodes.length > 0) {
+              for (let i = 0, length = removedNodes.length - 1; i <= length; i++) {
+                const node = removedNodes[i]
+                if (node.tagName === 'YT-LIVE-CHAT-ITEM-LIST-RENDERER') {
+                  removed = true
+                }
+              }
+            }
+
+            if (typeof addedNodes !== 'undefined' && addedNodes.length > 0 && removed) {
+              for (let i = 0, length = addedNodes.length - 1; i <= length; i++) {
+                const node = addedNodes[i]
+                if (node.tagName === 'YT-LIVE-CHAT-ITEM-LIST-RENDERER') {
+                  finished = true
+                  this._overseer?.disconnect?.()
+                  this._observer?.disconnect?.()
+                  this._bannerWatcher?.disconnect?.()
+                  this._dockerWatcher?.disconnect?.()
+                  this._tickerWatcher?.disconnect?.()
+                  this._popupChatWatcher?.disconnect?.()
+                  PersistentSyncStorage.emit(this.source)
+                  return
+                }
+              }
+            }
+          }
+        })
+      })
+    }
+    this._overseer.observe(this._container, {
+      childList: true,
+      attributes: false,
+      characterData: false,
+      subtree: false
+    })
+  }
+
+  getTicker () { // This isn't actually getting the ticker element but the ancestor of the yt-live-chat-pinned-message-renderer that's linked to ticker events
+    const checkForTicker = (res, rej) => {
+      this._ticker = document.getElementById('pinned-message')
+      // '#message.style-scope.yt-live-chat-pinned-message-renderer' (no relation to yt-live-chat-banner-renderer which shows pinned messages)
+      if (this._ticker !== null) {
+        res()
+      } else {
+        setTimeout(checkForTicker.bind(this, res, rej), 250)
+      }
+    }
+    return new Promise(checkForTicker)
+  } // Does not refresh upon chat refresh
+
+  watchTicker () {
+    if (this._tickerWatcher === null) {
+      this._tickerWatcher = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          const { addedNodes } = mutation
+          if (typeof addedNodes !== 'undefined' && addedNodes.length > 0) {
+            for (let i = 0, length = addedNodes.length - 1; i <= length; i++) {
+              const node = addedNodes[i]
+              const { isMessage, messageType } = this.isMessageNode(node)
+              if (isMessage) {
+                this.onNewMessage(node, messageType, 'ticker')
+              }
+            }
+          }
+        })
+      })
+    }
+    this._tickerWatcher.observe(this._ticker, {
+      childList: true,
+      attributes: false,
+      characterData: false,
+      subtree: true
+    })
+  }
+
+  getDockedContainer () { // behaves like a pinned message?
+    const checkForContainer = (res, rej) => {
+      this._docker = document.getElementById('docked-messages')
+      if (this._docker !== null) {
+        res()
+      } else {
+        setTimeout(checkForContainer.bind(this, res, rej), 250)
+      }
+    }
+    return new Promise(checkForContainer)
+  }
+
+  watchDocker () {
+    if (this._dockerWatcher === null) {
+      this._dockerWatcher = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          const { addedNodes } = mutation
+          if (typeof addedNodes !== 'undefined' && addedNodes.length > 0) {
+            for (let i = 0, length = addedNodes.length - 1; i <= length; i++) {
+              const node = addedNodes[i]
+              const { isMessage, messageType } = this.isMessageNode(node)
+              if (isMessage) {
+                this.onNewMessage(node, messageType, 'docker')
+              }
+            }
+          }
+        })
+      })
+    }
+    this._dockerWatcher.observe(this._docker, {
+      childList: true,
+      attributes: false,
+      characterData: false,
+      subtree: true
     })
   }
 
@@ -151,6 +376,7 @@ class ChatWatcher extends EventEmitter {
       if (this._participantList !== null) {
         res()
       } else {
+        console.log('getParticipants') // debug -> get an error when opening participants tab
         setTimeout(checkForParticipants.bind(this, res, rej), 250)
       }
     }
@@ -194,183 +420,101 @@ class ChatWatcher extends EventEmitter {
     }
   }
 
-  injectRefreshButton () { // could use yt's own material design version instead
-    if (document.getElementById('refreshButton')) return
-
-    const buttonContainer = document.createElement('div')
-    buttonContainer.setAttribute('data-tooltip', 'Refresh chat')
-    buttonContainer.setAttribute('tabindex', '0')
-    buttonContainer.id = 'refreshButtonContainer'
-    buttonContainer.className = 'tooltip-left'
-
-    const button = document.createElement('div')
-    button.id = 'refreshButton'
-    button.addEventListener('click', () => {
-      document.querySelector('tp-yt-paper-listbox > a[aria-selected=\'true\']')?.click() // wait to see if getElementById('trigger') is viable
-      document.getElementById('refreshButtonContainer').setAttribute('data-tooltip', 'Refreshing...')
-      console.log('Chat refreshed')
-    })
-    button.innerHTML = '<span class="material-icons">refresh</span>'
-    buttonContainer.appendChild(button)
-    document.getElementById('action-buttons').appendChild(buttonContainer)
-    button.style.display = 'flex'
-
-    buttonContainer.addEventListener('keydown', (key) => {
-      if (key.code === 'Space' || key.code === 'Enter' || key.code === 'NumpadEnter') {
-        document.querySelector('tp-yt-paper-listbox > a[aria-selected=\'true\']')?.click() // wait to see if getElementById('trigger') is viable
-        document.getElementById('refreshButtonContainer').setAttribute('data-tooltip', 'Refreshing...')
-        console.log('Chat refreshed')
-      }
-    })
-  }
-
-  injectOptionsButton () {
-    if (document.getElementById('optionsButton')) return
-
-    const buttonContainer = document.createElement('div')
-    buttonContainer.setAttribute('data-tooltip', 'BetterNaifuYTG options')
-    buttonContainer.setAttribute('tabindex', '0')
-    buttonContainer.id = 'optionsButtonContainer'
-    buttonContainer.className = 'tooltip-left'
-
-    const button = document.createElement('div')
-    button.id = 'optionsButton'
-    button.addEventListener('click', () => {
-      chrome.runtime.sendMessage({ name: 'optionsPopup' })
-    })
-    button.innerHTML = '<span class="material-icons">settings</span>'
-    buttonContainer.appendChild(button)
-    document.getElementById('action-buttons').appendChild(buttonContainer)
-    button.style.display = 'flex'
-
-    buttonContainer.addEventListener('keydown', (key) => {
-      if (key.code === 'Space' || key.code === 'Enter' || key.code === 'NumpadEnter') {
-        chrome.runtime.sendMessage({ name: 'optionsPopup' })
-      }
-    })
-  }
-
-  injectButtons () {
-    this.injectRefreshButton()
-    this.injectOptionsButton()
-    document.getElementById('action-buttons').setAttribute('style', 'display: flex; gap: 10px')
-  }
-
-  getTicker () { // This isn't actually getting the ticker element but the ancestor of the yt-live-chat-pinned-message-renderer that's linked to ticker events
-    const checkForTicker = (res, rej) => {
-      this._ticker = document.getElementById('pinned-message')
-      // '#message.style-scope.yt-live-chat-pinned-message-renderer' (no relation to yt-live-chat-banner-renderer which shows pinned messages)
-      if (this._ticker !== null) {
-        res()
+  addPopupMarker () {
+    const checkForSheet = (res, rej) => {
+      const sheetPresent = document.getElementById('bytg-popup-marker')
+      if (sheetPresent) {
+        setTimeout(res, 100)
       } else {
-        setTimeout(checkForTicker.bind(this, res, rej), 250)
+        document.body.appendChild(this.popupMarker)
+        setTimeout(checkForSheet.bind(this, res, rej), 100)
       }
     }
-    return new Promise(checkForTicker)
-  } // Does not refresh upon chat refresh
+    return new Promise(checkForSheet)
+  }
 
-  watchTicker () {
-    if (this._tickerWatcher === null) {
-      this._tickerWatcher = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          const { addedNodes } = mutation
-          if (typeof addedNodes !== 'undefined' && addedNodes.length > 0) {
-            for (let i = 0, length = addedNodes.length - 1; i <= length; i++) {
-              const node = addedNodes[i]
-              const { isMessage, messageType } = this.isMessageNode(node)
-              if (isMessage) {
-                this.onNewMessage(node, messageType, 'ticker')
+  removePopupMarker () {
+    const checkForSheet = (res, rej) => {
+      const sheetPresent = document.getElementById('bytg-popup-marker')
+      if (sheetPresent) {
+        sheetPresent.parentNode.removeChild(sheetPresent)
+        setTimeout(checkForSheet.bind(this, res, rej), 100)
+      } else {
+        setTimeout(res, 100)
+      }
+    }
+    return new Promise(checkForSheet)
+  }
+
+  getPopupChat () {
+    this._popupChats = document.getElementsByTagName('ytd-engagement-panel-section-list-renderer')
+    const checkForPopupChat = (res, rej) => {
+      if (document.getElementById('bytg-popup-marker')) rej()
+      Array.from(this._popupChats).forEach((elt) => {
+        if (elt.hasAttribute('live-chat-reply-panel')) {
+          this._popupChat = document.querySelector('ytd-engagement-panel-section-list-renderer[live-chat-reply-panel]')
+          res() // use with setTimeout of 100 if making tabcompleter for input element
+        }
+      })
+      setTimeout(checkForPopupChat.bind(this, res, rej), 100)
+    }
+    return new Promise(checkForPopupChat)
+  }
+
+  watchPopupChat () {
+    if (this._popupChatWatcher === null) {
+      if (!document.getElementById('bytg-popup-marker')) document.body.appendChild(this.popupMarker)
+      this._popupChatWatcher = new MutationObserver((mutations, observer) => {
+        if (document.getElementById('bytg-popup-marker')) {
+          mutations.forEach((mutation) => {
+            const { addedNodes } = mutation
+            if (typeof addedNodes !== 'undefined' && addedNodes.length > 0) {
+              for (let i = 0, length = addedNodes.length - 1; i <= length; i++) {
+                const node = addedNodes[i]
+                const { isMessage, messageType } = this.isMessageNode(node)
+                if (isMessage) {
+                  this.onNewMessage(node, messageType, 'popup')
+                }
               }
             }
-          }
-        })
+          })
+        } else {
+          observer.disconnect()
+          this._popupChatWatcher.disconnect()
+        }
       })
     }
-    this._tickerWatcher.observe(this._ticker, {
+    this._popupChatWatcher.observe(this._popupChat, {
       childList: true,
       attributes: false,
       characterData: false,
       subtree: true
     })
+
+    this.parsePreloadedPopupMessages()
+    // insert tabcompleter here?
   }
 
-  getContainer () {
-    // Parent of yt-live-chat-item-list-renderer.style-scope.yt-live-chat-renderer that gets reset when live/top chat toggled
-    // Basically the chat container ancestor
-    const checkForContainer = (res, rej) => {
-      this._container = document.getElementById('item-list')
-      if (this._container !== null) {
-        res()
-      } else {
-        setTimeout(checkForContainer.bind(this, res, rej), 250)
-      }
-    }
-    return new Promise(checkForContainer)
-  }
+  parsePreloadedPopupMessages () {
+    const headerMessage = this._popupChat.querySelector('#content.yt-live-chat-item-display-renderer')?.firstChild
+    const chatMessages = this._popupChat.querySelector('#items.style-scope.yt-live-chat-item-display-list-renderer')?.children
 
-  watchContainer () {
-    let removed = false
-    let finished = false
-    if (this._overseer === null) {
-      this._overseer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (!finished) {
-            const { addedNodes, removedNodes } = mutation
-
-            if (typeof removedNodes !== 'undefined' && removedNodes.length > 0) {
-              for (let i = 0, length = removedNodes.length - 1; i <= length; i++) {
-                const node = removedNodes[i]
-                if (node.tagName === 'YT-LIVE-CHAT-ITEM-LIST-RENDERER') {
-                  removed = true
-                }
-              }
-            }
-
-            if (typeof addedNodes !== 'undefined' && addedNodes.length > 0 && removed) {
-              for (let i = 0, length = addedNodes.length - 1; i <= length; i++) {
-                const node = addedNodes[i]
-                if (node.tagName === 'YT-LIVE-CHAT-ITEM-LIST-RENDERER') {
-                  finished = true
-                  PersistentSyncStorage.emit(this.source)
-                  return
-                }
-              }
-            }
-          }
-        })
+    if (headerMessage !== undefined && headerMessage !== null) {
+      [headerMessage].forEach((node) => {
+        if (node && !node.hasAttribute('bytg-id')) {
+          const { isMessage, messageType } = this.isMessageNode(node)
+          if (isMessage) this.onNewMessage(node, messageType, 'popup')
+        }
       })
     }
-    this._overseer.observe(this._container, {
-      childList: true,
-      attributes: false,
-      characterData: false,
-      subtree: false
-    })
-  }
-
-  getChatContainer () {
-    // Parent of actual chat (children are messages)
-    const checkForContainer = (res, rej) => {
-      this._chatContainer = document.querySelector('#items.style-scope.yt-live-chat-item-list-renderer')
-      if (this._chatContainer !== null) {
-        res()
-      } else {
-        setTimeout(checkForContainer.bind(this, res, rej), 250)
-      }
+    if (chatMessages !== undefined) {
+      Array.from(chatMessages).forEach((node) => {
+        if (node && !node.hasAttribute('bytg-id')) {
+          const { isMessage, messageType } = this.isMessageNode(node)
+          if (isMessage) this.onNewMessage(node, messageType, 'popup')
+        }
+      })
     }
-    return new Promise(checkForContainer)
-  }
-
-  getDockedContainer () { // behaves like a pinned message?
-    const checkForContainer = (res, rej) => {
-      this._docker = document.getElementById('docked-messages')
-      if (this._docker !== null) {
-        res()
-      } else {
-        setTimeout(checkForContainer.bind(this, res, rej), 250)
-      }
-    }
-    return new Promise(checkForContainer)
   }
 
   getBannerContainer () { // pinned messages/polls/etc
@@ -383,31 +527,6 @@ class ChatWatcher extends EventEmitter {
       }
     }
     return new Promise(checkForContainer)
-  }
-
-  watchDocker () {
-    if (this._dockerWatcher === null) {
-      this._dockerWatcher = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          const { addedNodes } = mutation
-          if (typeof addedNodes !== 'undefined' && addedNodes.length > 0) {
-            for (let i = 0, length = addedNodes.length - 1; i <= length; i++) {
-              const node = addedNodes[i]
-              const { isMessage, messageType } = this.isMessageNode(node)
-              if (isMessage) {
-                this.onNewMessage(node, messageType, 'docker')
-              }
-            }
-          }
-        })
-      })
-    }
-    this._dockerWatcher.observe(this._docker, {
-      childList: true,
-      attributes: false,
-      characterData: false,
-      subtree: true
-    })
   }
 
   watchBanner () { // Doesn't convert polls (or anything besides messages) atm
@@ -435,17 +554,6 @@ class ChatWatcher extends EventEmitter {
     })
   }
 
-  parsePreloadedMessages () {
-    const messages = this._chatContainer.children
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const node = messages[i]
-      const { isMessage, messageType } = this.isMessageNode(node)
-      if (isMessage) {
-        this.onNewMessage(node, messageType, 'chat')
-      }
-    }
-  }
-
   parsePreloadedPins () { // For preloaded pinned messages
     const messages = this._banner.querySelector('#visible-banners').children
     for (let i = messages.length - 1; i >= 0; i--) {
@@ -457,6 +565,19 @@ class ChatWatcher extends EventEmitter {
     }
 
     // haven't tested how to handle docked items yet...
+  }
+
+  getChatContainer () {
+    // Parent of actual chat (children are messages)
+    const checkForContainer = (res, rej) => {
+      this._chatContainer = document.querySelector('#items.style-scope.yt-live-chat-item-list-renderer')
+      if (this._chatContainer !== null) {
+        res()
+      } else {
+        setTimeout(checkForContainer.bind(this, res, rej), 250)
+      }
+    }
+    return new Promise(checkForContainer)
   }
 
   watchChat () {
@@ -483,10 +604,15 @@ class ChatWatcher extends EventEmitter {
     })
   }
 
-  onNewMessage (node, messageType, source) {
-    const hats = this.hats ? Object.keys(this.hats) : null
-    const hat = hats ? this.hats[hats[Math.floor(hats.length * Math.random())]] : null
-    const message = new Message(node, messageType, source, this.emotes, this.authorAvatar, hat)
+  parsePreloadedMessages () {
+    const messages = this._chatContainer.children
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const node = messages[i]
+      const { isMessage, messageType } = this.isMessageNode(node)
+      if (isMessage) {
+        this.onNewMessage(node, messageType, 'chat')
+      }
+    }
   }
 
   isMessageNode (node) {
@@ -513,45 +639,18 @@ class ChatWatcher extends EventEmitter {
     return node.getAttribute('bytg-id') !== null
   }
 
+  onNewMessage (node, messageType, source) {
+    const hats = this.hats ? Object.keys(this.hats).filter(key => { return this.hats[key].active }) : null
+    const hat = hats && hats.length > 0 ? this.hats[hats[Math.floor(hats.length * Math.random())]] : null
+    const message = new Message(node, messageType, source, this.emotes, this.authorAvatar, hat)
+  }
+
   hideAvatars () {
     if (!document.getElementById('bytg-avatar-sheet')) document.body.appendChild(this.avatarSheet)
   }
 
-  hideMessages () {
-    if (!document.getElementById('bytg-message-sheet')) document.body.appendChild(this.messageSheet)
-  }
-
-  hideReactions () {
-    if (!document.getElementById('bytg-reaction-sheet')) document.body.appendChild(this.reactionSheet)
-  }
-
-  showOverflow () {
-    if (!document.getElementById('bytg-overflow-sheet')) document.body.appendChild(this.overflowSheet)
-  }
-
   showAvatars () {
     const sheetPresent = document.getElementById('bytg-avatar-sheet')
-    if (sheetPresent) {
-      sheetPresent.parentNode.removeChild(sheetPresent)
-    }
-  }
-
-  showMessages () {
-    const sheetPresent = document.getElementById('bytg-message-sheet')
-    if (sheetPresent) {
-      sheetPresent.parentNode.removeChild(sheetPresent)
-    }
-  }
-
-  showReactions () {
-    const sheetPresent = document.getElementById('bytg-reaction-sheet')
-    if (sheetPresent) {
-      sheetPresent.parentNode.removeChild(sheetPresent)
-    }
-  }
-
-  hideOverflow () {
-    const sheetPresent = document.getElementById('bytg-overflow-sheet')
     if (sheetPresent) {
       sheetPresent.parentNode.removeChild(sheetPresent)
     }
@@ -565,6 +664,17 @@ class ChatWatcher extends EventEmitter {
     }
   }
 
+  hideMessages () {
+    if (!document.getElementById('bytg-message-sheet')) document.body.appendChild(this.messageSheet)
+  }
+
+  showMessages () {
+    const sheetPresent = document.getElementById('bytg-message-sheet')
+    if (sheetPresent) {
+      sheetPresent.parentNode.removeChild(sheetPresent)
+    }
+  }
+
   toggleMessages () {
     if (PersistentSyncStorage.data.options.hideMessages) {
       this.hideMessages()
@@ -573,11 +683,33 @@ class ChatWatcher extends EventEmitter {
     }
   }
 
+  hideReactions () {
+    if (!document.getElementById('bytg-reaction-sheet')) document.body.appendChild(this.reactionSheet)
+  }
+
+  showReactions () {
+    const sheetPresent = document.getElementById('bytg-reaction-sheet')
+    if (sheetPresent) {
+      sheetPresent.parentNode.removeChild(sheetPresent)
+    }
+  }
+
   toggleReactions () {
     if (PersistentSyncStorage.data.options.hideReactions) {
       this.hideReactions()
     } else {
       this.showReactions()
+    }
+  }
+
+  showOverflow () {
+    if (!document.getElementById('bytg-overflow-sheet')) document.body.appendChild(this.overflowSheet)
+  }
+
+  hideOverflow () {
+    const sheetPresent = document.getElementById('bytg-overflow-sheet')
+    if (sheetPresent) {
+      sheetPresent.parentNode.removeChild(sheetPresent)
     }
   }
 
