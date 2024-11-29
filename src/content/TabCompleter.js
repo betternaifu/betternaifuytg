@@ -3,6 +3,7 @@ import TrieSearch from 'trie-search'
 class TabCompleter {
   constructor (inputNode) {
     this.node = inputNode
+    // this.isPopup = +isPopup
 
     this.options = null
 
@@ -147,16 +148,21 @@ class TabCompleter {
             } else {
               const pos = this.getNodeOffset(this.position)
               let toNextWord = 0
-              for (const word of pos.resNode.textContent.split(' ')) {
-                toNextWord += word.length + 1
-                if (toNextWord > pos.resOffset) {
-                  toNextWord -= 1
-                  break
+              if (pos.resNode.nodeType === 3) {
+                for (const word of pos.resNode.textContent.split(' ')) {
+                  toNextWord += word.length + 1
+                  if (toNextWord > pos.resOffset) {
+                    toNextWord -= 1
+                    break
+                  }
                 }
+              } else {
+                toNextWord = 1
               }
               this.position += toNextWord - pos.resOffset
             }
             let charCount = parseInt(document.getElementById('count').textContent.split('/')[0])
+            // let charCount = parseInt(document.getElementsById('count')[this.isPopup].textContent.split('/')[0])
             for (let node = this.node.firstChild; node; node = node.nextSibling) {
               if (node.nodeType !== 3) {
                 charCount -= 1
@@ -168,8 +174,12 @@ class TabCompleter {
               this.node.dispatchEvent(new InputEvent('input', {})) // registers text
             } else {
               const curr = this.getNodeOffset(this.position)
-              if (curr.resOffset === curr.resNode.textContent.length && curr.resNode.nextSibling) {
-                if (curr.resNode.nextSibling.nodeType !== 3) this.position -= 1
+              if (curr.resNode.nodeType === 3) {
+                if (curr.resOffset === curr.resNode.textContent.length) {
+                  if (curr.resNode.nextSibling === null || curr.resNode.nextSibling.nodeType !== 3) this.position -= 1
+                }
+              } else {
+                this.position -= curr.resOffset
               }
             }
             this.position += 1
@@ -230,7 +240,9 @@ class TabCompleter {
     let counter = 0
     let resNode = null
     let resOffset = null
+    let parentOffset = 0
     for (let node = this.node.firstChild; node; node = node.nextSibling) {
+      parentOffset += 1
       if (counter === index) {
         resNode = node
         resOffset = 0
@@ -246,12 +258,14 @@ class TabCompleter {
         }
       } else {
         counter += 1
+        resNode = node
+        resOffset = 1
       }
     }
     if (resNode === null || resOffset === null) {
       console.warn(`Index ${index} is out of bounds!`)
     }
-    return { resNode, resOffset }
+    return { resNode, resOffset, parentOffset }
   }
 
   selectRange (start, end) {
@@ -265,11 +279,23 @@ class TabCompleter {
       const rangestart = this.getNodeOffset(start)
       if (end !== start) {
         const endrange = this.getNodeOffset(end)
-        range.setEnd(endrange.resNode, endrange.resOffset)
+        if (endrange.resNode.nodeType === 3) {
+          range.setEnd(endrange.resNode, endrange.resOffset)
+        } else {
+          range.setEnd(endrange.resNode.parentNode, endrange.parentOffset)
+        }
       } else {
-        range.setEnd(rangestart.resNode, rangestart.resOffset)
+        if (rangestart.resNode.nodeType === 3) {
+          range.setEnd(rangestart.resNode, rangestart.resOffset)
+        } else {
+          range.setEnd(rangestart.resNode.parentNode, rangestart.parentOffset)
+        }
       }
-      range.setStart(rangestart.resNode, rangestart.resOffset)
+      if (rangestart.resNode.nodeType === 3) {
+        range.setStart(rangestart.resNode, rangestart.resOffset)
+      } else {
+        range.setStart(rangestart.resNode.parentNode, rangestart.parentOffset)
+      }
       document.getSelection().removeAllRanges()
       document.getSelection().addRange(range)
     }

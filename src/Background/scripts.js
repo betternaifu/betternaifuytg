@@ -77,9 +77,9 @@ export function fixLeaks () {
 }
 
 /* * * Function for overriding Youtube emoji complete in the default live chat input (doesn't apply to superchat inputs atm?) * * */
-export function disableEmojiComplete () {
+export function disableEmojiComplete (emotes) {
   const renderer = document.querySelector('iframe#chatframe')?.contentDocument.querySelector('yt-live-chat-text-input-field-renderer#input.yt-live-chat-message-input-renderer') ?? document.querySelector('yt-live-chat-text-input-field-renderer#input.yt-live-chat-message-input-renderer')
-  renderer.completeEmojis = () => {}
-  renderer.completeEmojis_ = () => {}
-  renderer.completeEmojisInRange = () => {}
+  const emojiShortcutMap = renderer.emojiManager.emojiShortcutMap
+  const emojiShortcuts = Object.keys(emojiShortcutMap)
+  emotes.filter((key) => emojiShortcuts.includes(key.toLowerCase())).forEach((key) => delete emojiShortcutMap[key.toLowerCase()])
 }
