@@ -91,6 +91,7 @@ class Main {
           chrome.scripting.executeScript({
             target: { tabId: sender.tab.id, allFrames: false },
             func: disableEmojiComplete,
+            args: [ message.emotes ],
             world: 'MAIN'
           })
           sendResponse(PersistentSyncStorage.data.options.disableAutoEmoji)

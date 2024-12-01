@@ -1,4 +1,5 @@
 import PersistentSyncStorage from 'src/helpers/PersistentSyncStorage'
+import rng from 'src/helpers/hash'
 
 import Emote from './Emote'
 
@@ -29,28 +30,39 @@ const fetchDict = (dict) => {
 class Emotes {
   constructor () {
     this.dictionary = new Map()
-    this.init = this.init.bind(this)
     this.blacklist = new Map()
-    this.hats = null
-  }
 
-  init (suppress) {
-    this.suppressLogging = suppress || false
-    this.dictionary = new Map()
-    this.blacklist = new Map()
-    this.styles = null
-    this.dimensions = null
+    this.hats = null
+
+    this.loadedHats = null
+
     this.loadedCustom = null
     this.loadedTwitch = null
     this.loadedBTTV = null
     this.loadedFFZ = null
+
+    this.init = this.init.bind(this)
+    this.doneLoading = this.doneLoading.bind(this)
+  }
+
+  init (suppress) {
+    this.suppressLogging = suppress || false
+
+    this.dictionary = new Map()
+    this.blacklist = new Map()
+
+    // this.hats = null
+
     this.loadedHats = null
+
+    this.loadedCustom = null
+    this.loadedTwitch = null
+    this.loadedBTTV = null
+    this.loadedFFZ = null
+
     return Promise.all([
-      PersistentSyncStorage.data.options.enableBetterYTGEmotes &&
-        this.loadDimensions(),
-      (PersistentSyncStorage.data.options.enableBetterYTGEmotes ||
-        PersistentSyncStorage.data.options.enableBTTVEmotes) &&
-        this.loadStyles()
+      PersistentSyncStorage.data.options.enableHats &&
+        this.loadHats()
     ])
   }
 
@@ -65,41 +77,17 @@ class Emotes {
       PersistentSyncStorage.data.options.enableBetterYTGEmotes &&
         this.loadBetterYTG(),
       PersistentSyncStorage.data.options.emoteBlacklist &&
-        this.loadBlacklist(),
-      PersistentSyncStorage.data.options.enableHats &&
-        this.loadHats()
+        this.loadBlacklist()
     ])
   }
 
   doneLoading () {
-    const loadedDims = (this.dimensions != null) || !PersistentSyncStorage.data.options.enableBetterYTGEmotes
-    const loadedStyles = (this.styles != null) || !(PersistentSyncStorage.data.options.enableBTTVEmotes || PersistentSyncStorage.data.options.enableBetterYTGEmotes)
     const loadedBetterYTGEmotes = (this.loadedCustom != null) || !PersistentSyncStorage.data.options.enableBetterYTGEmotes
     const loadedTwitch = (this.loadedTwitch != null) || !PersistentSyncStorage.data.options.enableTwitchEmotes
     const loadedBTTV = (this.loadedBTTV != null) || !PersistentSyncStorage.data.options.enableBTTVEmotes
     const loadedFFZ = (this.loadedFFZ != null) || !PersistentSyncStorage.data.options.enableFFZEmotes
     const loadedHats = (this.loadedHats != null) || !PersistentSyncStorage.data.options.enableHats
-    return loadedDims && loadedStyles && loadedBetterYTGEmotes && loadedTwitch && loadedBTTV && loadedFFZ && loadedHats
-  }
-
-  loadStyles () {
-    return new Promise((res) => {
-      fetchDict('styles').then(styling => {
-        this.styles = styling
-        if (!this.suppressLogging) console.log('Loaded styling')
-        res()
-      }).catch(() => { if (!this.suppressLogging) console.log('Failed to load styling'); this.styles = false; res() })
-    })
-  }
-
-  loadDimensions () {
-    return new Promise((res) => {
-      fetchDict('dims').then(dims => {
-        this.dimensions = dims
-        if (!this.suppressLogging) console.log('Loaded dimensions')
-        res()
-      }).catch((err) => { if (!this.suppressLogging) console.log(`Failed to load dimensions:\n${err}`); this.dimensions = false; res() })
-    })
+    return loadedBetterYTGEmotes && loadedTwitch && loadedBTTV && loadedFFZ && loadedHats
   }
 
   loadHats () {
@@ -107,6 +95,7 @@ class Emotes {
       fetchDict('hats').then(hats => {
         this.hats = hats
         if (!this.suppressLogging) console.log('Fetched hats')
+        this.loadedHats = true
         res()
       }).catch((err) => { if (!this.suppressLogging) console.log(`Failed to fetch hats:\n${err}`); this.loadedHats = false; res() })
     })
@@ -121,26 +110,36 @@ class Emotes {
           const emoteId = TwitchEmotes[code].code
           const url = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteId}/default/dark/1.0`
           const source = 'Twitch'
-          const style = this.styles[code]
+          const style = TwitchEmotes[code].style
           const height = TwitchEmotes[code].height
           const width = TwitchEmotes[code].width
           this.dictionary.set(code, new Emote({ code, url, source, style, height, width }))
         }
-        if (PersistentSyncStorage.data.options.ClickThis) {
+        const date = new Intl.DateTimeFormat('sv-SE', {
+          month: '2-digit',
+          day: '2-digit',
+          year: 'numeric',
+          timeZone: 'America/New_York'
+        }).format(new Date()).replaceAll('-', '')
+        const rand = rng(date)
+        let golden = rand < 0.01
+        if (!golden && PersistentSyncStorage.data.options.ClickThis) {
           const roll = Math.random()
-          if (roll < 0.01) {
-            const code = 'Kappa'
-            const emoteId = '80393'
-            const url = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteId}/default/dark/1.0`
-            const source = 'Twitch'
-            const style = this.styles[code]
-            const height = 28
-            const width = 22
-            this.dictionary.set('Kappa', new Emote({ code, url, source, style, height, width }))
-            console.log('You struck gold!')
-          }
+          if (roll < 0.01) golden = true
+        }
+        if (golden) {
+          const code = 'Kappa'
+          const emoteId = '80393'
+          const url = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteId}/default/dark/1.0`
+          const source = 'Twitch'
+          const style = TwitchEmotes[code].style
+          const height = 28
+          const width = 22
+          this.dictionary.set('Kappa', new Emote({ code, url, source, style, height, width }))
+          console.log('You struck gold!')
         }
         if (!this.suppressLogging) console.log('Loaded Twitch emotes')
+        this.loadedTwitch = true
         res()
       }).catch((err) => { if (!this.suppressLogging) console.log(`Failed to load Twitch emotes:\n${err}`); this.loadedTwitch = false; res() })
     })
@@ -155,12 +154,13 @@ class Emotes {
           const emoteId = emotes[i].id
           const url = `https://cdn.frankerfacez.com/emote/${emoteId}/1`
           const source = 'FFZ'
-          const style = this.styles[code]
+          const style = emotes[i].style
           const height = emotes[i].height
           const width = emotes[i].width
           this.dictionary.set(code, new Emote({ code, url, source, style, height, width }))
         }
         if (!this.suppressLogging) console.log('Loaded FFZ emotes')
+        this.loadedFFZ = true
         res()
       }).catch((err) => { if (!this.suppressLogging) console.log(`Failed to load FFZ emotes:\n${err}`); this.loadedFFZ = false; res() })
     })
@@ -173,13 +173,14 @@ class Emotes {
         for (let i = 0; i < emotes.length; i++) {
           const code = emotes[i]
           const url = BTTVEmotes[code].url
-          const style = this.styles[code]
+          const style = BTTVEmotes[code].style
           const source = 'BTTV'
           const height = BTTVEmotes[code].height
           const width = BTTVEmotes[code].width
           this.dictionary.set(code, new Emote({ code, url, source, style, height, width }))
         }
         if (!this.suppressLogging) console.log('Loaded BTTV emotes')
+        this.loadedBTTV = true
         res()
       }).catch((err) => { if (!this.suppressLogging) console.log(`Failed to load BTTV emotes:\n${err}`); this.loadedBTTV = false; res() })
     })
@@ -187,19 +188,20 @@ class Emotes {
 
   loadBetterYTG () {
     return new Promise((res, rej) => {
-      fetchDict('dictionary').then(CustomEmotes => {
+      fetchDict('custom').then(CustomEmotes => {
         const emoteCodes = Object.keys(CustomEmotes)
         for (let i = emoteCodes.length - 1; i >= 0; i--) {
           const code = emoteCodes[i]
-          const filename = CustomEmotes[code]
+          const filename = CustomEmotes[code].asset
           const url = `${REMOTE_URL}/assets/images/${filename}`
           const source = 'Custom'
-          const style = this.styles[code]
-          const height = this.dimensions[code].height
-          const width = this.dimensions[code].width
+          const style = CustomEmotes[code].style
+          const height = CustomEmotes[code].height
+          const width = CustomEmotes[code].width
           this.dictionary.set(code, new Emote({ code, url, source, style, height, width }))
         }
         if (!this.suppressLogging) console.log('Loaded custom emotes')
+        this.loadedCustom = true
         res()
       }).catch((err) => { if (!this.suppressLogging) console.log(`Failed to load custom emotes:\n${err}`); this.loadedCustom = false; res() })
     })
