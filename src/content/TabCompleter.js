@@ -307,6 +307,13 @@ class TabCompleter {
       this.tooltip = document.getElementById('tabcomplete-tooltip-container')
       if (!this.tooltip) {
         this.tooltip = document.createElement('div')
+        const div = document.createElement('div')
+        div.className = 'tabcomplete-image-container'
+        const img = document.createElement('img')
+        img.id = 'tabcomplete-image'
+        img.className = 'tabcomplete-image'
+        div.appendChild(img)
+        this.tooltip.appendChild(div)
       } else {
         existing = true
       }
@@ -327,14 +334,16 @@ class TabCompleter {
   }
 
   showTooltip (name, url) {
-    if (document.getSelection().toString().length >= 0) { // Can remove the equal case if you don't want completed names to get tooltip
-      this.tooltip.classList.remove('hiding')
-    }
     const rect = document.getSelection().getRangeAt(0).getBoundingClientRect()
     this.tooltip.style.position = 'fixed'
     this.tooltip.style.top = (rect.top - 40) + 'px'
     this.tooltip.style.left = (rect.left + 0.5 * rect.width) + 'px'
-    this.tooltip.innerHTML = `<div class="tabcomplete-image-container"><img class="tabcomplete-image" src="${url}" alt="${name}"></div>`
+    const img = document.getElementById('tabcomplete-image')
+    img.src = url
+    img.alt = name
+    if (document.getSelection().toString().length >= 0) { // Can remove the equal case if you don't want completed names to get tooltip
+      this.tooltip.classList.remove('hiding')
+    }
   }
 }
 
