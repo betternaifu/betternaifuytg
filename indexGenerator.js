@@ -201,7 +201,7 @@ waitForDims.then(() => {
 })
 
 // Keep until fully migrated to keeping styles in emote set JSON
-const TO_COPY = ['styles', 'hats', 'dictionary'].concat(['newEmotes'])
+const TO_COPY = ['styles', 'hats', 'dictionary']
 for (const file of TO_COPY) {
   const filePath = `${process.cwd()}/json/${file}.json`
   const jsonData = require(`./json/src/${file}.json`)
