@@ -50,5 +50,10 @@
 	"PirateHat": {"group":false,"left":0,"up":7},
 	"PumpkinHat": {"group":false,"left":1,"up":0},
 	"SPEED3zw": {"group":false,"left":0,"up":0},
-	"zQuesi": {"group":false,"left":0,"up":0}
+	"zQuesi": {"group":false,"left":0,"up":0},
+	"frierenPoint": {"group":false,"left":-6,"up":0},
+	"akiraAlone": {"group":true,"left":0,"up":0},
+	"spongeBEHOLD": {"group":false,"left":5,"up":0},
+	"mk1st": {"group":false,"left":0,"up":0},
+	"mk24th": {"group":false,"left":0,"up":0}
 }
