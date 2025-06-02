@@ -255,6 +255,7 @@
 	"SmoocherZ": {"code":"89945","height":28,"width":28},
 	"SoBayed": {"code":"1906","height":30,"width":24},
 	"SoonerLater": {"code":"2113050","height":28,"width":28},
+	"SplitFictionJosef": {"code":"emotesv2_6e73db88c8a44efcba8fb77d9a4f8cd0","height":28,"width":28},
 	"Squid1": {"code":"191762","height":28,"width":28},
 	"Squid2": {"code":"191763","height":28,"width":28},
 	"Squid3": {"code":"191764","height":28,"width":28},
@@ -300,9 +301,10 @@
 	"VoHiYo": {"code":"81274","height":28,"width":28},
 	"VoteNay": {"code":"106294","height":28,"width":28},
 	"VoteYea": {"code":"106293","height":28,"width":28},
-	"WTRuck": {"code":"114847","height":28,"width":28},
+	"WeDidThat": {"code":"emotesv2_a7ab2c184e334d4a9784e6e5d51947f7","height":28,"width":28},
 	"WholeWheat": {"code":"1896","height":30,"width":20},
 	"WhySoSerious": {"code":"emotesv2_1fda4a1b40094c93af334f8b60868a7c","height":28,"width":28},
+	"WTRuck": {"code":"114847","height":28,"width":28},
 	"WutFace": {"code":"28087","height":28,"width":28},
 	"YouDontSay": {"code":"134254","height":28,"width":28},
 	"YouWHY": {"code":"4337","height":28,"width":28},
@@ -334,5 +336,11 @@
 	"BunnyCharge": {"code":"emotesv2_b5751982f59347b78f51691f2b08d445","height":28,"width":28},
 	"ChewyYAY": {"code":"emotesv2_0e0a3592d8334ef5a1cfcae6f3e76acb","height":28,"width":28},
 	"KingWorldCup": {"code":"emotesv2_533b8c4a9f6e4bfbb528ad39974e3481","height":28,"width":28},
-	"PopGhost": {"code":"emotesv2_cff32f43571543828847738e27acf4ef","height":28,"width":28}
+	"PopGhost": {"code":"emotesv2_cff32f43571543828847738e27acf4ef","height":28,"width":28},
+	"DarthJarJar": {"code":"emotesv2_d1f3a59775454943b4e2c6a6db8892a2","height":28,"width":28},
+	"FeverFighter": {"code":"emotesv2_fc2f39b6a62c4d7e832993eab17547d2","height":28,"width":28},
+	"McDZombieHamburglar": {"code":"emotesv2_8e1771f1d00840d0b0e681a4b30b60e5","height":28,"width":28},
+	"NRWylder": {"code":"emotesv2_37e6845ef2f14499904b9ef99e7039be","height":28,"width":28},
+	"StreamerU": {"code":"emotesv2_0815281d279e4fa5a63da5ad847c0de7","height":28,"width":28},
+	"ZLANsup": {"code":"emotesv2_bd02ce011d11477cba6b2753e19fbd55","height":28,"width":28}
 }

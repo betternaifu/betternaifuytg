@@ -174,7 +174,7 @@ const checkForDims = (res, rej) => { if (Object.keys(dims).length >= total) { re
 const waitForDims = new Promise(checkForDims)
 waitForDims.then(() => {
   const dimFile = process.cwd() + '/json/dims.json'
-  fs.writeFile(dimFile, JSON.stringify(dims, null, 2), 'utf8', function (err) {
+  fs.writeFile(dimFile, JSON.stringify(dims), 'utf8', function (err) {
     if (err) {
       console.log("File '" + dimFile + "' couldn't be overwritten (or some other error occurred). Aborted!")
     } else {
@@ -184,7 +184,7 @@ waitForDims.then(() => {
   for (const setName of EMOTE_SETS) {
     const filePath = `${process.cwd()}/json/${setName.toLowerCase()}.json`
     const jsonData = JSON_DATA[setName]
-    fs.writeFile(filePath, JSON.stringify(jsonData, null, 2), 'utf8', function (err) {
+    fs.writeFile(filePath, JSON.stringify(jsonData), 'utf8', function (err) {
       if (err) {
         console.log("File '" + filePath + "' couldn't be overwritten (or some other error occurred). Aborted!")
       } else {
@@ -205,7 +205,7 @@ const TO_COPY = ['styles', 'hats', 'dictionary']
 for (const file of TO_COPY) {
   const filePath = `${process.cwd()}/json/${file}.json`
   const jsonData = require(`./json/src/${file}.json`)
-  fs.writeFile(filePath, JSON.stringify(jsonData, null, 2), 'utf8', function (err) {
+  fs.writeFile(filePath, JSON.stringify(jsonData), 'utf8', function (err) {
     if (err) {
       console.log("File '" + filePath + "' couldn't be overwritten (or some other error occurred). Aborted!")
     } else {
