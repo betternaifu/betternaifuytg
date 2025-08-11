@@ -344,5 +344,16 @@
 	"StreamerU": {"code":"emotesv2_0815281d279e4fa5a63da5ad847c0de7","height":28,"width":28},
 	"ZLANsup": {"code":"emotesv2_bd02ce011d11477cba6b2753e19fbd55","height":28,"width":28},
 	"MechaCharge": {"code":"emotesv2_4a709e77c64a4856b6e104d31b9b0d32","height":28,"width":28},
-	"VelocityRun": {"code":"emotesv2_35143e47feb64878bf49d84c2f4d59c7","height":28,"width":28}
+	"VelocityRun": {"code":"emotesv2_35143e47feb64878bf49d84c2f4d59c7","height":28,"width":28},
+	"BossCleared": {"code":"emotesv2_af733ade48134f0ba333dfc780a2844c","height":28,"width":28},
+	"ACShadows": {"code":"emotesv2_e0a34fe8504e49c189454c681448897e","height":28,"width":28},
+	"AndTime": {"code":"emotesv2_13afd2c89c094ec8b526530c522df998","height":28,"width":28},
+	"BAFTAGames": {"code":"emotesv2_3ac080e51cb94396a083a9855a357677","height":28,"width":28},
+	"ClixHuh": {"code":"emotesv2_634d9f10a8bf4776ad46df1bb2c9a7ca","height":28,"width":28},
+	"LoveSmash": {"code":"emotesv2_607246977bfd4c53bc85d8b755c52cf7","height":28,"width":28},
+	"Oops25": {"code":"emotesv2_589565a59ed6486db82b38fe2f043b69","height":28,"width":28},
+	"ShareTheHug": {"code":"emotesv2_724a8fce86c345488638b545e7caffda","height":28,"width":28},
+    "ShareTheLO": {"code":"emotesv2_dfb329d0b6c942fdb8ed837a49adea94","height":28,"width":28},
+    "ShareTheVE": {"code":"emotesv2_63a6315078fb4d5d9649587e09fd92e3","height":28,"width":28},
+	"SimsPlumbob": {"code":"emotesv2_6581608ddd89425eb4374a34b6b4337e","height":28,"width":28}
 }
